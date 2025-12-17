@@ -12,3 +12,116 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum TransactionType {
+  income
+  expense
+}
+
+enum PaymentMethod {
+  cash
+  installment
+  recurring
+}
+
+enum Status {
+  pending
+  paid
+  overdue
+}
+
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique
+  name      String?
+  email     String?
+  timezone  String?
+  locale    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  transactions Transaction[]
+  entities     Entity[]
+  categories   Category[]
+}
+
+model Entity {
+  id          String    @id @default(uuid())
+  userId      String
+  name        String
+  document    String? // CPF/CNPJ ou identificador
+  phoneNumber String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  // relations
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@unique([userId, name]) // evita duplicação de nome por usuário
+  @@index([userId])
+}
+
+model Transaction {
+  id            String          @id @default(uuid())
+  userId        String
+  entityId      String? // contraparte (opcional)
+  categoryId    String? // categoria escolhida pelo usuário
+  title         String
+  description   String?         @db.Text
+  type          TransactionType
+  amountCents   Int // valor total em centavos (ex: R$10,00 -> 1000)
+  paymentMethod PaymentMethod
+  occurredAt    DateTime // data em que o pagamento/recebimento ocorreu (informada pelo usuário)
+  metadata      Json?           @db.JsonB
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?
+
+  // relations
+  user         User          @relation(fields: [userId], references: [id])
+  entity       Entity?       @relation(fields: [entityId], references: [id])
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  installments Installment[]
+
+  @@index([userId])
+  @@index([occurredAt])
+  @@index([deletedAt])
+}
+
+model Installment {
+  id                String    @id @default(uuid())
+  transactionId     String
+  installmentNumber Int // ex: 1, 2, 3
+  totalInstallments Int // ex: 12
+  dueDate           DateTime
+  amountCents       Int
+  paidAt            DateTime?
+  status            Status
+  paymentDetails    Json?     @db.JsonB
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([transactionId])
+  @@index([dueDate])
+}
