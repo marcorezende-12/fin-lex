@@ -1,8 +1,15 @@
 import Image from "next/image";
 
 import { Button } from "../_components/ui/button";
+import { SignInButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-const LoginPage = () => {
+const LoginPage = async () => {
+  const { userId } = await auth();
+  if (userId) {
+    redirect("/");
+  }
   return (
     <div className="grid h-full grid-cols-2">
       <div className="mx-auto flex h-full max-w-[550px] flex-col justify-center p-8">
@@ -19,20 +26,22 @@ const LoginPage = () => {
           concentra todas suas movimentações, oferece visualização personalizada
           e facilita o controle do seu orçamento pessoal ou do seu escritório
         </p>
-        <Button variant="outline">
-          <Image
-            src="/google-icon.png"
-            alt="Google"
-            width={18}
-            height={18}
-            className="mr-2"
-          />
-          Entrar com o Google
-        </Button>
+        <SignInButton>
+          <Button variant="outline">
+            <Image
+              src="/google-icon.png"
+              alt="Google"
+              width={18}
+              height={18}
+              className="mr-2"
+            />
+            Fazer login ou criar conta
+          </Button>
+        </SignInButton>
       </div>
       <div className="relative h-full w-full">
         <Image
-          src="/image-2.png"
+          src="/image-3.png"
           alt="Faça login"
           fill
           className="object-cover"

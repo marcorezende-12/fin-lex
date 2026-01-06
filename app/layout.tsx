@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -20,9 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${mulish.className} dark h-full antialiased`}>
-        <div className="flex h-full flex-col overflow-hidden">{children}</div>
-      </body>
+      <ClerkProvider>
+        <body className={`${mulish.className} dark h-full antialiased`}>
+          <div className="flex h-full flex-col overflow-hidden">{children}</div>
+        </body>
+      </ClerkProvider>
     </html>
   );
 }
