@@ -1,9 +1,9 @@
-import Image from "next/image";
-
-import { Button } from "../_components/ui/button";
 import { SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import Image from "next/image";
 import { redirect } from "next/navigation";
+
+import { Button } from "../_components/ui/button";
 
 const LoginPage = async () => {
   const { userId } = await auth();
@@ -21,7 +21,7 @@ const LoginPage = async () => {
           className="mb-8"
         />
         <h1 className="mb-3 text-4xl font-bold">Bem-vindo</h1>
-        <p className="text-muted-f\oreground mb-8">
+        <p className="text-muted-foreground mb-8">
           O FinLex é uma plataforma de gestão financeira para advogados, que
           concentra todas suas movimentações, oferece visualização personalizada
           e facilita o controle do seu orçamento pessoal ou do seu escritório
@@ -41,7 +41,7 @@ const LoginPage = async () => {
       </div>
       <div className="relative h-full w-full">
         <Image
-          src="/image-3.png"
+          src="/login-image.png"
           alt="Faça login"
           fill
           className="object-cover"
