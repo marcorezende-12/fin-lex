@@ -1,4 +1,6 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { dark } from "@clerk/themes";
 
 import type { Metadata } from "next";
 import { Mulish } from "next/font/google";
@@ -20,9 +22,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${mulish.className} dark h-full antialiased`}>
-        <div className="flex h-full flex-col overflow-hidden">{children}</div>
-      </body>
+      <ClerkProvider
+        appearance={{
+          theme: dark,
+        }}
+      >
+        <body className={`${mulish.className} dark h-full antialiased`}>
+          <div className="flex h-full flex-col overflow-hidden">{children}</div>
+        </body>
+      </ClerkProvider>
     </html>
   );
 }
