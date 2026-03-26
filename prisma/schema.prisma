@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -13,115 +7,168 @@ datasource db {
   provider = "postgresql"
 }
 
+// ==========================================
+// ENUMS
+// ==========================================
+
 enum TransactionType {
-  income
-  expense
+  INCOME
+  EXPENSE
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  OVERDUE
 }
 
 enum PaymentMethod {
-  cash
-  installment
-  recurring
+  PIX
+  CREDIT_CARD
+  DEBIT_CARD
+  BOLETO
+  BANK_TRANSFER
+  CASH
+  INSTALLMENT
+  OTHER
 }
 
-enum Status {
-  pending
-  paid
-  overdue
+enum Role {
+  ADMIN
+  USER
 }
 
-model User {
-  id        String   @id @default(uuid())
-  clerkId   String   @unique
-  name      String?
-  email     String?
-  timezone  String?
-  locale    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ==========================================
+// MODELS
+// ==========================================
 
-  // relations
-  transactions Transaction[]
-  entities     Entity[]
-  categories   Category[]
-}
-
-model Entity {
-  id          String    @id @default(uuid())
-  userId      String
-  name        String
-  document    String? // CPF/CNPJ ou identificador
-  phoneNumber String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  // relations
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
-
-  @@index([userId])
-  @@index([deletedAt])
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  userId    String
+model Organization {
+  id        String    @id @default(cuid())
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
+  // Relations
+  users            User[]
+  clients          Client[]
+  categories       Category[]
+  transactions     Transaction[]
+  installmentPlans InstallmentPlan[]
 
-  @@unique([userId, name]) // evita duplicação de nome por usuário
-  @@index([userId])
-}
-
-model Transaction {
-  id            String          @id @default(uuid())
-  userId        String
-  entityId      String? // contraparte (opcional)
-  categoryId    String? // categoria escolhida pelo usuário
-  title         String
-  description   String?         @db.Text
-  type          TransactionType
-  amountCents   Int // valor total em centavos (ex: R$10,00 -> 1000)
-  paymentMethod PaymentMethod
-  occurredAt    DateTime // data em que o pagamento/recebimento ocorreu (informada pelo usuário)
-  metadata      Json?           @db.JsonB
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  deletedAt     DateTime?
-
-  // relations
-  user         User          @relation(fields: [userId], references: [id])
-  entity       Entity?       @relation(fields: [entityId], references: [id])
-  category     Category?     @relation(fields: [categoryId], references: [id])
-  installments Installment[]
-
-  @@index([userId])
-  @@index([occurredAt])
   @@index([deletedAt])
 }
 
-model Installment {
-  id                String    @id @default(uuid())
-  transactionId     String
-  installmentNumber Int // ex: 1, 2, 3
-  totalInstallments Int // ex: 12
-  dueDate           DateTime
-  amountCents       Int
-  paidAt            DateTime?
-  status            Status
-  paymentDetails    Json?     @db.JsonB
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  deletedAt         DateTime?
+model User {
+  id             String    @id @default(cuid())
+  organizationId String
+  clerkId        String?   @unique
+  name           String
+  email          String    @unique
+  role           Role      @default(USER)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
 
-  transaction Transaction @relation(fields: [transactionId], references: [id])
+  // Relations
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
-  @@index([transactionId])
-  @@index([dueDate])
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  email          String?
+  document       String? // CPF or CNPJ
+  phone          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model Category {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  color          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model InstallmentPlan {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String // e.g. "Divórcio João - Honorários"
+  totalAmount    Int // Total amount in cents
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([organizationId])
+  @@index([deletedAt])
+}
+
+model Transaction {
+  id                String  @id @default(cuid())
+  organizationId    String
+  installmentPlanId String?
+  clientId          String?
+  categoryId        String?
+  userId            String // Audit: User who created the transaction
+
+  name          String // Client name or expense description
+  description   String?           @db.Text
+  amountInCents Int // Stored in cents
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  paymentMethod PaymentMethod
+
+  // Installment specific (optional, used if paymentMethod is PARCELADO or belongs to a plan)
+  installmentNumber Int?
+  totalInstallments Int?
+
+  dueDate DateTime
+  paidAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  installmentPlan InstallmentPlan? @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
+  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  user            User             @relation(fields: [userId], references: [id])
+
+  // Indexes for Dashboard and Reports filtering
+  @@index([organizationId])
+  @@index([organizationId, dueDate])
+  @@index([organizationId, type, status])
+  @@index([installmentPlanId])
+  @@index([deletedAt])
 }

@@ -27,7 +27,7 @@ const LoginPage = async () => {
           e facilita o controle do seu orçamento pessoal ou do seu escritório
         </p>
         <SignInButton>
-          <Button variant="outline">
+          <Button variant="outline" className="cursor-pointer">
             <Image
               src="/google-icon.png"
               alt="Google"
