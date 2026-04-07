@@ -40,23 +40,26 @@ enum Role {
 // ==========================================
 // MODELS
 // ==========================================
-
 model User {
-  id          String   @id @default(cuid())
-  clerkId     String?  @unique
-  name        String
-  email       String   @unique
-  role        Role     @default(USER)
-  avatarUrl   String?
+  id                    String   @id @default(cuid())
+  clerkId               String?  @unique
+  name                  String
+  email                 String   @unique
+  role                  Role     @default(USER)
+  avatarUrl             String?
+  
+  // Novo campo adicionado
+  onboardingCompleted   Boolean  @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  deletedAt             DateTime?
 
-  clients          Client[]
-  categories       Category[]
-  transactions     Transaction[]
-  installmentPlans InstallmentPlan[]
+  // Relations
+  clients               Client[]
+  categories            Category[]
+  transactions          Transaction[]
+  installmentPlans      InstallmentPlan[]
 
   @@index([clerkId])
   @@index([deletedAt])
@@ -65,7 +68,6 @@ model User {
 model Client {
   id          String   @id @default(cuid())
   userId      String
-
   name        String
   email       String?
   document    String?
