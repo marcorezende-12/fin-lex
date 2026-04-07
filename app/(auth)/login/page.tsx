@@ -3,13 +3,26 @@ import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { Button } from "../_components/ui/button";
+import { Button } from "../../_components/ui/button";
+import { db } from "../../_lib/prisma";
 
 const LoginPage = async () => {
   const { userId } = await auth();
+
+  // Se o usuário está autenticado, verifica no banco de dados
   if (userId) {
-    redirect("/");
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    });
+
+    if (user) {
+      redirect("/"); // Já existe no DB, vai pro Dashboard
+    } else {
+      redirect("/onboarding"); // Não existe no DB, vai pro Onboarding
+    }
   }
+
+  // Se não estiver autenticado, exibe a tela de login
   return (
     <div className="grid h-full grid-cols-2">
       <div className="mx-auto flex h-full max-w-[550px] flex-col justify-center p-8">

@@ -10,7 +10,6 @@ datasource db {
 // ==========================================
 // ENUMS
 // ==========================================
-
 enum TransactionType {
   INCOME
   EXPENSE
@@ -42,133 +41,123 @@ enum Role {
 // MODELS
 // ==========================================
 
-model Organization {
-  id        String    @id @default(cuid())
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String?  @unique
+  name        String
+  email       String   @unique
+  role        Role     @default(USER)
+  avatarUrl   String?
 
-  // Relations
-  users            User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
   clients          Client[]
   categories       Category[]
   transactions     Transaction[]
   installmentPlans InstallmentPlan[]
 
-  @@index([deletedAt])
-}
-
-model User {
-  id             String    @id @default(cuid())
-  organizationId String
-  clerkId        String?   @unique
-  name           String
-  email          String    @unique
-  role           Role      @default(USER)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Relations
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-
-  @@index([organizationId])
+  @@index([clerkId])
   @@index([deletedAt])
 }
 
 model Client {
-  id             String    @id @default(cuid())
-  organizationId String
-  name           String
-  email          String?
-  document       String? // CPF or CNPJ
-  phone          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id          String   @id @default(cuid())
+  userId      String
 
-  // Relations
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name        String
+  email       String?
+  document    String?
+  phone       String?
+  birthDate   DateTime?
+  nickName    String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  country     String?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
-  @@index([organizationId])
+  @@index([userId])
   @@index([deletedAt])
 }
 
 model Category {
-  id             String    @id @default(cuid())
-  organizationId String
-  name           String
-  color          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  color       String?
 
-  // Relations
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
-  @@unique([organizationId, name])
-  @@index([organizationId])
+  @@unique([userId, name])
+  @@index([userId])
   @@index([deletedAt])
 }
 
 model InstallmentPlan {
-  id             String    @id @default(cuid())
-  organizationId String
-  name           String // e.g. "Divórcio João - Honorários"
-  totalAmount    Int // Total amount in cents
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id                String   @id @default(cuid())
+  userId            String
+  name              String
+  totalAmount       Int
 
-  // Relations
-  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
 
-  @@index([organizationId])
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+
+  @@index([userId])
   @@index([deletedAt])
 }
 
 model Transaction {
-  id                String  @id @default(cuid())
-  organizationId    String
-  installmentPlanId String?
-  clientId          String?
-  categoryId        String?
-  userId            String // Audit: User who created the transaction
+  id                   String            @id @default(cuid())
+  
+  userId               String
+  clientId             String?
+  categoryId           String?
+  installmentPlanId    String?
 
-  name          String // Client name or expense description
-  description   String?           @db.Text
-  amountInCents Int // Stored in cents
-  type          TransactionType
-  status        TransactionStatus @default(PENDING)
-  paymentMethod PaymentMethod
+  name                 String
+  description          String?           @db.Text
+  amountInCents        Int
+  type                 TransactionType
+  status               TransactionStatus @default(PENDING)
+  paymentMethod        PaymentMethod
 
-  // Installment specific (optional, used if paymentMethod is PARCELADO or belongs to a plan)
-  installmentNumber Int?
-  totalInstallments Int?
+  installmentNumber    Int?
+  totalInstallments    Int?
 
-  dueDate DateTime
-  paidAt  DateTime?
+  dueDate              DateTime
+  paidAt               DateTime?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  deletedAt            DateTime?
 
-  // Relations
-  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  installmentPlan InstallmentPlan? @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
-  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  user            User             @relation(fields: [userId], references: [id])
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client               Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  category             Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  installmentPlan      InstallmentPlan?  @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
 
-  // Indexes for Dashboard and Reports filtering
-  @@index([organizationId])
-  @@index([organizationId, dueDate])
-  @@index([organizationId, type, status])
+  @@index([userId])
+  @@index([userId, dueDate])
+  @@index([userId, type, status])
   @@index([installmentPlanId])
   @@index([deletedAt])
 }
