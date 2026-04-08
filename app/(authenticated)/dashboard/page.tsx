@@ -7,6 +7,7 @@ import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
 import { db } from "../../_lib/prisma";
 import { ChartBarStacked } from "../charts/_components/chart-bar";
+import { TransactionsTable } from "../transactions/_components/transactions-table";
 import SummaryCards from "./_components/summary-cards";
 
 const DashboardPage = async () => {
@@ -42,15 +43,18 @@ const DashboardPage = async () => {
       </div>
 
       {/* 2. DIVISÃO DA TELA: 2/3 (Cards) e 1/3 (Gráfico) */}
-      <div className="grid grid-cols-1 gap-6 lg:h-[320px] lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* ESQUERDA: */}
-        <div className="h-full lg:col-span-2">
+        <div className="h-[400px] lg:col-span-2">
           <SummaryCards />
         </div>
-        <div className="h-full">
+        <div className="h-[400px]">
           <ChartBarStacked />
         </div>
       </div>
+
+      {/* 3. TABELA DE MOVIMENTAÇÕES RECENTES */}
+      <TransactionsTable />
     </div>
   );
 };

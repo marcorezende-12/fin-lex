@@ -41,18 +41,15 @@ const chartConfig = {
 
 export function ChartBarStacked() {
   return (
-    <Card className="border-border bg-card flex h-full flex-col rounded-2xl shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="border-border bg-card flex h-[400px] flex-col overflow-hidden rounded-2xl shadow-sm">
+      <CardHeader className="flex shrink-0 flex-row items-center justify-between">
         <CardTitle>Receitas e Despesas</CardTitle>
         <Button variant="outline" className="cursor-pointer justify-end">
           Ver mais
         </Button>
       </CardHeader>
-      <CardContent className="flex-1 pb-4">
-        <ChartContainer
-          config={chartConfig}
-          className="h-full min-h-[200px] w-full"
-        >
+      <CardContent className="flex-1 overflow-hidden pb-4">
+        <ChartContainer config={chartConfig} className="h-full w-full">
           <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis

@@ -4,7 +4,7 @@ import { SummaryCard } from "./summary-card";
 
 const SummaryCards = () => {
   return (
-    <div className="grid h-full grid-rows-2 gap-6">
+    <div className="grid h-[400px] grid-rows-2 gap-6 overflow-hidden">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         <SummaryCard
           title="Receita Prevista"

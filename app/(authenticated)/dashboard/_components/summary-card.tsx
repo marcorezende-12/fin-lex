@@ -17,7 +17,7 @@ export function SummaryCard({
 }: SummaryCardProps) {
   return (
     <div className="border-border bg-card flex h-full flex-col justify-between rounded-2xl border p-6 shadow-sm">
-      <div className="text-muted-foreground flex items-center gap-3">
+      <div className="text-muted-foreground flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full ${iconWrapperClass}`}
         >
@@ -25,7 +25,7 @@ export function SummaryCard({
         </div>
         <span className="text-base font-medium">{title}</span>
       </div>
-      <p className={`text-3xl font-bold ${amountColorClass} mt-4`}>{amount}</p>
+      <p className={`text-3xl font-bold ${amountColorClass}`}>{amount}</p>
     </div>
   );
 }
