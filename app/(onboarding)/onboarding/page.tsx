@@ -11,7 +11,7 @@ const OnboardingPage = async () => {
 
   // Apenas verifica autenticação (não toca no banco)
   if (!userId) {
-    redirect("/login");
+    redirect("/");
   }
 
   const clerkUser = await currentUser();

@@ -29,11 +29,11 @@ import {
 } from "../ui/sidebar";
 
 const menuItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Movimentações", url: "/pdv", icon: DollarSign },
-  { title: "Gráficos", url: "/expedicao", icon: ChartColumn },
-  { title: "Configurações", url: "configuracoes", icon: Settings },
-  { title: "Assinatura", url: "/caixa", icon: NotebookPen },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Movimentações", url: "/transactions", icon: DollarSign },
+  { title: "Gráficos", url: "/charts", icon: ChartColumn },
+  { title: "Configurações", url: "/settings", icon: Settings },
+  { title: "Assinatura", url: "/subscription", icon: NotebookPen },
 ];
 
 export function AppSidebar() {
@@ -54,11 +54,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="floating">
-      <SidebarHeader className="border-b">
+      <SidebarHeader className="border-b border-gray-500">
         <div className="flex items-center justify-between">
           {isExpanded && (
             <SidebarGroupLabel className="text-xl font-bold text-white">
-              <Image src="/logo.svg" alt="Pedi-Flow" width={100} height={30} />
+              <Image src="/logo.svg" alt="FinLex" width={100} height={30} />
             </SidebarGroupLabel>
           )}
 
@@ -87,7 +87,9 @@ export function AppSidebar() {
                         <item.icon
                           className={`h-5 w-5 transition-transform ${isActive ? "scale-110 text-green-600" : ""}`}
                         />
-                        <span className={`${isActive ? "text-green-600" : ""}`}>
+                        <span
+                          className={`${isActive ? "font-bold text-green-600" : ""}`}
+                        >
                           {item.title}
                         </span>
                       </Link>

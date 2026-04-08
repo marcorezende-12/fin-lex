@@ -3,8 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { Button } from "../../_components/ui/button";
-import { db } from "../../_lib/prisma";
+import { Button } from "../_components/ui/button";
+import { db } from "../_lib/prisma";
 
 const LoginPage = async () => {
   const { userId } = await auth();
@@ -16,7 +16,7 @@ const LoginPage = async () => {
     });
 
     if (user) {
-      redirect("/"); // Já existe no DB, vai pro Dashboard
+      redirect("/dashboard"); // Já existe no DB, vai pro Dashboard
     } else {
       redirect("/onboarding"); // Não existe no DB, vai pro Onboarding
     }

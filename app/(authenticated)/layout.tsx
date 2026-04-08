@@ -7,7 +7,7 @@ import { AppSidebar } from "../_components/layout/AppSidebar";
 import { SidebarProvider } from "../_components/ui/sidebar";
 import { db } from "../_lib/prisma";
 
-export default async function DashboardLayout({
+export default async function AuthenticatedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -16,7 +16,7 @@ export default async function DashboardLayout({
 
   // Proteção: se não estiver logado → redireciona para login
   if (!userId) {
-    redirect("/login");
+    redirect("/");
   }
 
   // Sincroniza o usuário com o banco (cria se não existir)
@@ -46,11 +46,6 @@ export default async function DashboardLayout({
       {/* Área principal do conteúdo */}
       <div className="flex w-full flex-1 flex-col overflow-hidden">
         {/* Header superior */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b px-8">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-green-600">FinLex</h1>
-          </div>
-        </header>
 
         {/* Conteúdo das páginas (Dashboard, Movimentações, etc) */}
         <main className="flex flex-1 flex-col overflow-auto p-6">
