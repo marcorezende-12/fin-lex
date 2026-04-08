@@ -2,9 +2,10 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { completeOnboarding } from "@/app/actions/onboarding";
+
+import { SubmitButton } from "./_components/submit-button";
 
 const OnboardingPage = async () => {
   const { userId } = await auth();
@@ -18,20 +19,23 @@ const OnboardingPage = async () => {
   const primaryEmail = clerkUser?.emailAddresses[0]?.emailAddress || "";
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md rounded-xl border bg-white p-8 shadow-sm">
+    <div className="bg-background flex h-screen items-center justify-center p-4">
+      <div className="border-border bg-card text-card-foreground w-full max-w-md rounded-xl border p-8 shadow-sm">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold tracking-tight">
             Bem-vindo ao FinLex
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="text-muted-foreground mt-2">
             Vamos finalizar seu cadastro para começar a usar a plataforma.
           </p>
         </div>
 
         <form action={completeOnboarding} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
               Nome Completo
             </label>
             <Input
@@ -44,28 +48,23 @@ const OnboardingPage = async () => {
                   ? `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim()
                   : ""
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
               placeholder="Digite seu nome completo"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Email
+            </label>
             <Input
               type="email"
               disabled
               value={primaryEmail}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
               placeholder="Digite seu email"
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full cursor-pointer py-3 text-base font-medium"
-          >
-            Finalizar Cadastro e Entrar
-          </Button>
+          <SubmitButton />
         </form>
       </div>
     </div>

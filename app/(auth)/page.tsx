@@ -27,11 +27,18 @@ const LoginPage = async () => {
     <div className="grid h-full grid-cols-2">
       <div className="mx-auto flex h-full max-w-[550px] flex-col justify-center p-8">
         <Image
-          src="/logo-1.svg"
+          src="/dark-logo.svg"
+          alt="FinLex"
           width={173}
           height={39}
+          className="mb-8 hidden dark:block"
+        />
+        <Image
+          src="/light-logo.svg"
           alt="FinLex"
-          className="mb-8"
+          width={173}
+          height={39}
+          className="mb-8 block dark:hidden"
         />
         <h1 className="mb-3 text-4xl font-bold">Bem-vindo</h1>
         <p className="text-muted-foreground mb-8">

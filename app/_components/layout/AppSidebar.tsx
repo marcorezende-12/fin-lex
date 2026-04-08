@@ -27,6 +27,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "../ui/sidebar";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -58,10 +59,23 @@ export function AppSidebar() {
         <div className="flex items-center justify-between">
           {isExpanded && (
             <SidebarGroupLabel className="text-xl font-bold text-white">
-              <Image src="/logo.svg" alt="FinLex" width={100} height={30} />
+              <Image
+                src="/dark-logo.svg"
+                alt="FinLex"
+                width={90}
+                height={30}
+                className="hidden dark:block"
+              />
+              <Image
+                src="/light-logo.svg"
+                alt="FinLex"
+                width={90}
+                height={30}
+                className="block dark:hidden"
+              />
             </SidebarGroupLabel>
           )}
-
+          <div>{isExpanded && <ThemeToggle />}</div>
           <SidebarTrigger>
             <Menu className="h-5 w-5" />
           </SidebarTrigger>
