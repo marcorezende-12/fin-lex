@@ -76,7 +76,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
           )}
           <div>{isExpanded && <ThemeToggle />}</div>
-          <SidebarTrigger>
+          <SidebarTrigger className="cursor-pointer">
             <Menu className="h-5 w-5" />
           </SidebarTrigger>
         </div>

@@ -1,7 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
+import { PlusIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { Button } from "@/app/_components/ui/button";
+import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
+
 import { db } from "../../_lib/prisma";
+import { ChartBarStacked } from "../charts/_components/chart-bar";
+import SummaryCards from "./_components/summary-cards";
 
 const DashboardPage = async () => {
   const { userId } = await auth();
@@ -22,14 +28,28 @@ const DashboardPage = async () => {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">
-          Bem-vindo ao Dashboard, {user.name}
-        </h1>
-        <p className="text-muted-foreground mb-4">
-          Aqui vai aparecer seu dashboard financeiro
-        </p>
+    <div className="flex flex-col gap-6">
+      {/* 1. CABEÇALHO: Título na esquerda e botão na direita*/}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+      </div>
+      <div className="flex justify-between">
+        <DatePickerWithRange />
+        <Button className="cursor-pointer font-bold">
+          <PlusIcon size={4} />
+          Adicionar Transação
+        </Button>
+      </div>
+
+      {/* 2. DIVISÃO DA TELA: 2/3 (Cards) e 1/3 (Gráfico) */}
+      <div className="grid grid-cols-1 gap-6 lg:h-[320px] lg:grid-cols-3">
+        {/* ESQUERDA: */}
+        <div className="h-full lg:col-span-2">
+          <SummaryCards />
+        </div>
+        <div className="h-full">
+          <ChartBarStacked />
+        </div>
       </div>
     </div>
   );
