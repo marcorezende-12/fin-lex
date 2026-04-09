@@ -1,33 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
 import { PlusIcon } from "lucide-react";
-import { redirect } from "next/navigation";
 
 import { Button } from "@/app/_components/ui/button";
 import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
-import { db } from "../../_lib/prisma";
 import { ChartLineMultiple } from "../charts/_components/line-chart";
 import { TransactionsTable } from "../transactions/_components/transactions-table";
 import SummaryCards from "./_components/summary-cards";
 
 const DashboardPage = async () => {
-  const { userId } = await auth();
-
-  // 1. Não tem login? Vai para a tela de login
-  if (!userId) {
-    redirect("/");
-  }
-
-  // 2. Busca o usuário no banco de dados local
-  const user = await db.user.findUnique({
-    where: { clerkId: userId },
-  });
-
-  // 3. Tá logado mas não tá no banco de dados? Vai para o onboarding terminar o cadastro
-  if (!user) {
-    redirect("/onboarding");
-  }
-
   return (
     <div className="flex flex-col gap-6">
       {/* 1. CABEÇALHO: Título na esquerda e botão na direita*/}

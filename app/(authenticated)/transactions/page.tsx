@@ -5,11 +5,7 @@ import { db } from "@/app/_lib/prisma";
 
 const TransactionsPage = async () => {
   const { userId } = await auth();
-
-  // 1. Não tem login? Vai para a tela de login
-  if (!userId) {
-    redirect("/");
-  }
+  if (!userId) return null;
 
   // 2. Busca o usuário no banco de dados local
   const user = await db.user.findUnique({

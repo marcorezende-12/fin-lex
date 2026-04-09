@@ -14,11 +14,6 @@ export default async function AuthenticatedLayout({
 }) {
   const { userId } = await auth();
 
-  // Proteção: se não estiver logado → redireciona para login
-  if (!userId) {
-    redirect("/");
-  }
-
   // Sincroniza o usuário com o banco (cria se não existir)
   // const syncedUser = await syncUser(userId);
 

@@ -1,6 +1,5 @@
 // app/(onboarding)/page.tsx
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { Input } from "@/app/_components/ui/input";
 import { completeOnboarding } from "@/app/actions/onboarding";
@@ -8,13 +7,6 @@ import { completeOnboarding } from "@/app/actions/onboarding";
 import { SubmitButton } from "./_components/submit-button";
 
 const OnboardingPage = async () => {
-  const { userId } = await auth();
-
-  // Apenas verifica autenticação (não toca no banco)
-  if (!userId) {
-    redirect("/");
-  }
-
   const clerkUser = await currentUser();
   const primaryEmail = clerkUser?.emailAddresses[0]?.emailAddress || "";
 

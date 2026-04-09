@@ -1,12 +1,26 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+// Defina quais rotas são públicas (que NÃO exigem login)
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/api/webhooks(.*)",
+  "/login(.*)",
+  "/signup(.*)",
+]);
 
+export default clerkMiddleware(async (auth, req) => {
+  // Se a rota NÃO for pública, ela é protegida!
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
+});
+
+// A configuração do Next.js para aplicar o middleware nas rotas corretas
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
+    // Pula os arquivos internos do Next.js e arquivos estáticos (CSS, imagens, fontes, etc)
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
+    // Sempre roda em rotas da API (trpc, etc)
     "/(api|trpc)(.*)",
   ],
 };
