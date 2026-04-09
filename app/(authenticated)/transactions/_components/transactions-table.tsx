@@ -94,6 +94,9 @@ export function TransactionsTable() {
     <div className="border-border bg-card flex flex-col overflow-hidden rounded-2xl border p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-lg font-bold">Movimentações</h2>
+        <Button variant="outline" className="cursor-pointer">
+          Ver mais
+        </Button>
       </div>
 
       <ScrollArea className="h-[300px] w-full">
@@ -102,7 +105,6 @@ export function TransactionsTable() {
             <TableRow className="border-border text-muted-foreground hover:bg-transparent">
               <TableHead className="text-muted-foreground font-medium">
                 <div className="flex items-center gap-3">
-                  <Checkbox id="select-all" />
                   <span>Nome</span>
                 </div>
               </TableHead>

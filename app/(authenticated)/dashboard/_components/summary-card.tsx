@@ -16,7 +16,7 @@ export function SummaryCard({
   iconWrapperClass = "bg-muted",
 }: SummaryCardProps) {
   return (
-    <div className="border-border bg-card flex h-full flex-col justify-between rounded-2xl border p-6 shadow-sm">
+    <div className="bg-card border-border flex h-full flex-col justify-between rounded-2xl border p-6 shadow-sm">
       <div className="text-muted-foreground flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full ${iconWrapperClass}`}

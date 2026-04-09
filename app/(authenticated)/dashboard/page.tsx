@@ -6,7 +6,7 @@ import { Button } from "@/app/_components/ui/button";
 import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
 import { db } from "../../_lib/prisma";
-import { ChartBarStacked } from "../charts/_components/chart-bar";
+import { ChartLineMultiple } from "../charts/_components/line-chart";
 import { TransactionsTable } from "../transactions/_components/transactions-table";
 import SummaryCards from "./_components/summary-cards";
 
@@ -49,7 +49,7 @@ const DashboardPage = async () => {
           <SummaryCards />
         </div>
         <div className="h-[400px]">
-          <ChartBarStacked />
+          <ChartLineMultiple />
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import { Button } from "@/app/_components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/app/_components/ui/chart";
 
-export const description = "A stacked bar chart with a legend";
+export const description = "A multiple line chart";
 
 const chartData = [
   { month: "January", income: 186, expense: 80 },
@@ -39,9 +39,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ChartBarStacked() {
+export function ChartLineMultiple() {
   return (
-    <Card className="bg-card border-border flex h-[400px] flex-col overflow-hidden rounded-2xl shadow-sm">
+    <Card className="border-border bg-card flex h-[400px] flex-col overflow-hidden rounded-2xl shadow-sm">
       <CardHeader className="flex shrink-0 flex-row items-center justify-between">
         <CardTitle>Receitas e Despesas</CardTitle>
         <Button variant="outline" className="cursor-pointer justify-end">
@@ -50,30 +50,42 @@ export function ChartBarStacked() {
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden pb-4">
         <ChartContainer config={chartConfig} className="h-full w-full">
-          <BarChart accessibilityLayer data={chartData}>
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
               tickLine={false}
-              tickMargin={10}
               axisLine={false}
+              tickMargin={8}
               tickFormatter={(value) => value.slice(0, 3)}
             />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
             <ChartLegend content={<ChartLegendContent />} />
-            <Bar
+            <Line
               dataKey="income"
-              stackId="a"
-              fill="var(--color-income)"
-              radius={[0, 0, 4, 4]}
+              type="monotone"
+              stroke="var(--color-income)"
+              strokeWidth={3}
+              dot={false}
             />
-            <Bar
+            <Line
               dataKey="expense"
-              stackId="a"
-              fill="var(--color-expense)"
-              radius={[4, 4, 0, 0]}
+              type="monotone"
+              stroke="var(--color-expense)"
+              strokeWidth={3}
+              dot={false}
             />
-          </BarChart>
+          </LineChart>
         </ChartContainer>
       </CardContent>
     </Card>
