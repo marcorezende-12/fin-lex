@@ -1,9 +1,7 @@
-import { PlusIcon } from "lucide-react";
-
-import { Button } from "@/app/_components/ui/button";
 import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
 import { ChartLineMultiple } from "../charts/_components/line-chart";
+import { AddTransactionButton } from "../transactions/_components/transaction-dialog";
 import { TransactionsTable } from "../transactions/_components/transactions-table";
 import SummaryCards from "./_components/summary-cards";
 
@@ -16,10 +14,7 @@ const DashboardPage = async () => {
       </div>
       <div className="flex justify-between">
         <DatePickerWithRange />
-        <Button className="cursor-pointer font-bold">
-          <PlusIcon size={4} />
-          Adicionar Transação
-        </Button>
+        <AddTransactionButton />
       </div>
 
       {/* 2. DIVISÃO DA TELA: 2/3 (Cards) e 1/3 (Gráfico) */}

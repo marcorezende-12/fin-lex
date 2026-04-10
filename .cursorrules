@@ -52,7 +52,7 @@ O sistema deve ser escalável, seguro, documentado e preparado para produção.
 - Usar **Zod** para validação de dados;
 - Usar **React Hook Form** para formulários;
 - Usar **TailwindCSS** para estilização;
-- Usar **shadcn/ui** para componentes;
+- Usar **shadcn/ui** para componentes na versão 3.5.0;
 - Separar claramente **frontend e backend (API routes)**;
 - Utilizar **Server Components sempre que possível**;
 - Criar **API RESTful bem estruturada**;
