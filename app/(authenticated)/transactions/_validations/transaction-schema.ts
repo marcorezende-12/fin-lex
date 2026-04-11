@@ -23,6 +23,16 @@ export const transactionSchema = z
     installments: z.coerce
       .number()
       .int({ message: "O número de parcelas deve ser um número inteiro" })
+      .max(360, { message: "O limite máximo é de 360 parcelas" })
+      .optional(),
+    installmentsData: z
+      .array(
+        z.object({
+          number: z.number(),
+          date: z.date(),
+          value: z.number(),
+        }),
+      )
       .optional(),
   })
   .superRefine((data, ctx) => {
