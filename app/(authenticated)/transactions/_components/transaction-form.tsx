@@ -33,6 +33,7 @@ import {
 } from "@/app/_components/ui/select";
 import { cn, formatCurrency } from "@/app/_lib/utils";
 
+import { createTransaction } from "../_actions/create-transaction";
 import {
   TransactionInput,
   transactionSchema,
@@ -98,8 +99,13 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
 
   const onSubmit = async (data: TransactionInput) => {
     const parsedData = transactionSchema.parse(data);
-    // TODO: Chamar Server Action futuramente
-    console.log(parsedData);
+    const result = await createTransaction(parsedData);
+
+    if (!result.success) {
+      form.setError("root", { message: result.error });
+      return;
+    }
+
     onSuccess();
   };
 
@@ -205,7 +211,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             )}
           />
 
-          {/* CATEGORIA */}
+          {/* CATEGORIA — opcional, busca dinâmica será implementada futuramente */}
           <FormField
             control={form.control}
             name="categoryId"
@@ -214,16 +220,15 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
                 <FormLabel>Categoria</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value ?? ""}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full cursor-pointer">
-                      <SelectValue placeholder="Selecione" />
+                      <SelectValue placeholder="Sem categoria" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {/* TODO: Fetch Categories dynamically */}
-                    <SelectItem value="cat-1">Sem Categoria</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -319,6 +324,13 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             </div>
           )}
 
+          {/* ERRO GERAL (retornado pela server action) */}
+          {form.formState.errors.root && (
+            <p className="text-destructive text-sm font-medium">
+              {form.formState.errors.root.message}
+            </p>
+          )}
+
           {/* BOTÕES */}
           <div className="grid w-full grid-cols-2 gap-4 pt-4">
             <Button
@@ -331,9 +343,10 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             </Button>
             <Button
               type="submit"
+              disabled={form.formState.isSubmitting}
               className="bg-primary text-primary-foreground hover:bg-primary/90 w-full cursor-pointer"
             >
-              Adicionar
+              {form.formState.isSubmitting ? "Salvando..." : "Adicionar"}
             </Button>
           </div>
         </form>
