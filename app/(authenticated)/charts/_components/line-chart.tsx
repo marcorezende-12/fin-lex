@@ -13,11 +13,14 @@ import {
 import { formatCurrency } from "@/app/_lib/utils";
 
 import { ChartDataPoint } from "../_actions/get-chart-data";
+import { LineView } from "../_components/chart-filters";
 
+// Mesmas cores dos cards do dashboard:
+// primary (verde) → receita | destructive (vermelho) → despesa
 const chartConfig = {
   income: {
     label: "Receita Real",
-    color: "var(--chart-1)",
+    color: "var(--color-primary)",
   },
   expense: {
     label: "Despesa Real",
@@ -25,24 +28,41 @@ const chartConfig = {
   },
   expectedIncome: {
     label: "Receita Prevista",
-    color: "var(--chart-2)",
+    color: "var(--color-primary)",
   },
   expectedExpense: {
     label: "Despesa Prevista",
-    color: "var(--chart-4)",
+    color: "var(--color-destructive)",
   },
 } satisfies ChartConfig;
 
 interface ChartLineMultipleProps {
   data: ChartDataPoint[];
-  /** Quando true, oculta as linhas de previsto (modo compacto para o dashboard) */
+  /**
+   * @deprecated Use hideYAxis em vez disso.
+   * Mantido por compatibilidade — quando true força view="real" e oculta YAxis.
+   */
   compact?: boolean;
+  /**
+   * Controla quais linhas são exibidas:
+   * - "real"     → Receita Real + Despesa Real (padrão)
+   * - "expected" → Receita Prevista + Despesa Prevista
+   */
+  view?: LineView;
+  /** Quando true, omite o eixo Y (útil em espaços reduzidos) */
+  hideYAxis?: boolean;
 }
 
 export function ChartLineMultiple({
   data,
   compact = false,
+  view = "real",
+  hideYAxis = false,
 }: ChartLineMultipleProps) {
+  const showReal = view === "real";
+  const showExpected = view === "expected";
+  const showYAxis = !compact && !hideYAxis;
+
   return (
     <ChartContainer config={chartConfig} className="h-full w-full">
       <LineChart
@@ -58,7 +78,7 @@ export function ChartLineMultiple({
           tickMargin={8}
           tick={{ fontSize: 12 }}
         />
-        {!compact && (
+        {showYAxis && (
           <YAxis
             tickLine={false}
             axisLine={false}
@@ -78,39 +98,51 @@ export function ChartLineMultiple({
           }
         />
         <ChartLegend content={<ChartLegendContent />} />
-        <Line
-          dataKey="income"
-          type="monotone"
-          stroke="var(--color-income)"
-          strokeWidth={2.5}
-          dot={{ r: 3 }}
-          activeDot={{ r: 5 }}
-        />
-        <Line
-          dataKey="expense"
-          type="monotone"
-          stroke="var(--color-expense)"
-          strokeWidth={2.5}
-          dot={{ r: 3 }}
-          activeDot={{ r: 5 }}
-        />
-        {!compact && (
+
+        {/* LINHAS REAIS */}
+        {showReal && (
+          <>
+            <Line
+              dataKey="income"
+              type="monotone"
+              stroke="var(--color-income)"
+              strokeWidth={2.5}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
+            />
+            <Line
+              dataKey="expense"
+              type="monotone"
+              stroke="var(--color-expense)"
+              strokeWidth={2.5}
+              dot={{ r: 3 }}
+              activeDot={{ r: 5 }}
+            />
+          </>
+        )}
+
+        {/* LINHAS PREVISTAS — mesma cor, traço diferente e leve opacidade */}
+        {showExpected && (
           <>
             <Line
               dataKey="expectedIncome"
               type="monotone"
               stroke="var(--color-expectedIncome)"
-              strokeWidth={2}
-              strokeDasharray="5 4"
-              dot={false}
+              strokeWidth={2.5}
+              strokeDasharray="6 4"
+              strokeOpacity={0.65}
+              dot={{ r: 3, fillOpacity: 0.65 }}
+              activeDot={{ r: 5 }}
             />
             <Line
               dataKey="expectedExpense"
               type="monotone"
               stroke="var(--color-expectedExpense)"
-              strokeWidth={2}
-              strokeDasharray="5 4"
-              dot={false}
+              strokeWidth={2.5}
+              strokeDasharray="6 4"
+              strokeOpacity={0.65}
+              dot={{ r: 3, fillOpacity: 0.65 }}
+              activeDot={{ r: 5 }}
             />
           </>
         )}

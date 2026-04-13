@@ -9,20 +9,22 @@ import {
 
 import { getChartData } from "./_actions/get-chart-data";
 import { ChartBarStacked } from "./_components/chart-bar";
-import { ChartFilters } from "./_components/chart-filters";
+import { ChartFilters, LineView } from "./_components/chart-filters";
 import { ChartLineMultiple } from "./_components/line-chart";
 
 interface ChartsPageProps {
   searchParams: Promise<{
     chart?: string;
     offset?: string;
+    view?: string;
   }>;
 }
 
 const ChartsPage = async ({ searchParams }: ChartsPageProps) => {
-  const { chart, offset } = await searchParams;
+  const { chart, offset, view } = await searchParams;
 
   const chartType = chart === "bar" ? "bar" : "line";
+  const lineView: LineView = view === "expected" ? "expected" : "real";
 
   // Calcula o mês central a partir do offset (padrão: 0 = mês atual)
   const monthOffset = parseInt(offset ?? "0", 10);
@@ -59,62 +61,28 @@ const ChartsPage = async ({ searchParams }: ChartsPageProps) => {
           <CardHeader>
             <CardTitle className="text-base font-semibold">
               {chartType === "line"
-                ? "Receitas e Despesas — Linha"
+                ? lineView === "real"
+                  ? "Receita Real × Despesa Real"
+                  : "Receita Prevista × Despesa Prevista"
                 : "Receitas e Despesas — Barras"}
             </CardTitle>
             <p className="text-muted-foreground text-xs">
-              Linhas contínuas = valores realizados · Linhas tracejadas =
-              valores previstos
+              {chartType === "line"
+                ? lineView === "real"
+                  ? "Valores de transações já pagas/recebidas"
+                  : "Valores de transações ainda pendentes"
+                : "Linhas contínuas = realizados · Tracejadas = previstos"}
             </p>
           </CardHeader>
           <CardContent className="h-[400px] pb-6">
             {chartType === "line" ? (
-              <ChartLineMultiple data={chartData} />
+              <ChartLineMultiple data={chartData} view={lineView} />
             ) : (
               <ChartBarStacked data={chartData} />
             )}
           </CardContent>
         </Card>
       )}
-
-      {/* LEGENDA DE CONCEITOS */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          {
-            color: "bg-[var(--chart-1)]",
-            label: "Receita Real",
-            desc: "Pagamentos confirmados",
-          },
-          {
-            color: "bg-destructive",
-            label: "Despesa Real",
-            desc: "Gastos confirmados",
-          },
-          {
-            color: "bg-[var(--chart-2)] opacity-60",
-            label: "Receita Prevista",
-            desc: "Pagamentos pendentes",
-          },
-          {
-            color: "bg-[var(--chart-4)] opacity-60",
-            label: "Despesa Prevista",
-            desc: "Gastos pendentes",
-          },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="border-border bg-card flex items-start gap-3 rounded-xl border p-4 shadow-sm"
-          >
-            <span
-              className={`mt-0.5 h-3 w-3 shrink-0 rounded-full ${item.color}`}
-            />
-            <div>
-              <p className="text-sm font-medium">{item.label}</p>
-              <p className="text-muted-foreground text-xs">{item.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

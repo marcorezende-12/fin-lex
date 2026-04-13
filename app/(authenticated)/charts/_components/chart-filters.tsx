@@ -14,6 +14,7 @@ import {
 } from "@/app/_components/ui/select";
 
 export type ChartType = "line" | "bar";
+export type LineView = "real" | "expected";
 
 const CHART_TYPES: {
   value: ChartType;
@@ -41,12 +42,18 @@ const MONTH_OPTIONS = [
   { value: "2", label: "Daqui 2 meses" },
 ];
 
+const LINE_VIEWS: { value: LineView; label: string }[] = [
+  { value: "real", label: "Real" },
+  { value: "expected", label: "Previsto" },
+];
+
 export function ChartFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const chartType = (searchParams.get("chart") as ChartType) ?? "line";
   const monthOffset = searchParams.get("offset") ?? "0";
+  const lineView = (searchParams.get("view") as LineView) ?? "real";
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -74,6 +81,23 @@ export function ChartFilters() {
           </Button>
         ))}
       </div>
+
+      {/* TOGGLE REAL / PREVISTO (apenas para gráfico de linha) */}
+      {chartType === "line" && (
+        <div className="flex items-center gap-1 rounded-lg border p-1">
+          {LINE_VIEWS.map((lv) => (
+            <Button
+              key={lv.value}
+              variant={lineView === lv.value ? "secondary" : "ghost"}
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => updateParam("view", lv.value)}
+            >
+              {lv.label}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* MÊS DE REFERÊNCIA (centro do eixo X) */}
       <Select

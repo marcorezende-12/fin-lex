@@ -14,10 +14,12 @@ import { formatCurrency } from "@/app/_lib/utils";
 
 import { ChartDataPoint } from "../_actions/get-chart-data";
 
+// Mesmas cores dos cards do dashboard e do gráfico de linha:
+// primary (verde) → receita | destructive (vermelho) → despesa
 const chartConfig = {
   income: {
     label: "Receita Real",
-    color: "var(--chart-1)",
+    color: "var(--color-primary)",
   },
   expense: {
     label: "Despesa Real",
@@ -25,11 +27,11 @@ const chartConfig = {
   },
   expectedIncome: {
     label: "Receita Prevista",
-    color: "var(--chart-2)",
+    color: "var(--color-primary)",
   },
   expectedExpense: {
     label: "Despesa Prevista",
-    color: "var(--chart-4)",
+    color: "var(--color-destructive)",
   },
 } satisfies ChartConfig;
 
