@@ -40,9 +40,16 @@ import {
 } from "../_validations/transaction-schema";
 import { InstallmentsDialog } from "./installments-dialog";
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 interface TransactionFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  categories?: SelectOption[];
+  clients?: SelectOption[];
 }
 
 const PAYMENT_METHOD_OPTIONS = [
@@ -61,7 +68,12 @@ const TRANSACTION_TYPE_OPTIONS = [
   { value: TransactionType.EXPENSE, label: "Despesa" },
 ];
 
-export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
+export function TransactionForm({
+  onSuccess,
+  onCancel,
+  categories = [],
+  clients = [],
+}: TransactionFormProps) {
   const [isInstallmentsDialogOpen, setIsInstallmentsDialogOpen] =
     useState(false);
 
@@ -211,7 +223,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
             )}
           />
 
-          {/* CATEGORIA — opcional, busca dinâmica será implementada futuramente */}
+          {/* CATEGORIA */}
           <FormField
             control={form.control}
             name="categoryId"
@@ -228,7 +240,52 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* TODO: Fetch Categories dynamically */}
+                    {categories.length === 0 ? (
+                      <div className="text-muted-foreground px-3 py-2 text-sm">
+                        Nenhuma categoria cadastrada
+                      </div>
+                    ) : (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* CLIENTE */}
+          <FormField
+            control={form.control}
+            name="clientId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cliente</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full cursor-pointer">
+                      <SelectValue placeholder="Sem cliente" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {clients.length === 0 ? (
+                      <div className="text-muted-foreground px-3 py-2 text-sm">
+                        Nenhum cliente cadastrado
+                      </div>
+                    ) : (
+                      clients.map((client) => (
+                        <SelectItem key={client.value} value={client.value}>
+                          {client.label}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 <FormMessage />

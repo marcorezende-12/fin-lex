@@ -32,7 +32,10 @@ export interface TransactionRow {
   totalInstallments: number | null;
   dueDate: Date;
   paidAt: Date | null;
+  categoryId: string | null;
   categoryName: string | null;
+  clientId: string | null;
+  clientName: string | null;
 }
 
 type ActionResult =
@@ -141,7 +144,10 @@ export async function getTransactions(
       totalInstallments: true,
       dueDate: true,
       paidAt: true,
+      categoryId: true,
       category: { select: { name: true } },
+      clientId: true,
+      client: { select: { name: true } },
     },
     orderBy: { dueDate: "asc" },
   });
@@ -152,6 +158,7 @@ export async function getTransactions(
       ...t,
       effectiveStatus: resolveEffectiveStatus(t.status, t.dueDate),
       categoryName: t.category?.name ?? null,
+      clientName: t.client?.name ?? null,
     })),
   };
 }

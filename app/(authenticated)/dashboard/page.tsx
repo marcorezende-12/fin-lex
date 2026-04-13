@@ -6,8 +6,10 @@ import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
 import { getChartData } from "../charts/_actions/get-chart-data";
 import { ChartPreview } from "../charts/_components/chart-preview";
+import { getCategories } from "../settings/_actions/category-actions";
+import { getClients } from "../settings/_actions/client-actions";
 import { getTransactions } from "../transactions/_actions/get-transactions";
-import { AddTransactionButton } from "../transactions/_components/transaction-dialog";
+import { AddTransactionButtonWrapper } from "../transactions/_components/add-transaction-button-wrapper";
 import { TransactionsTable } from "../transactions/_components/transactions-table";
 import { getDashboardSummary } from "./_actions/get-dashboard-summary";
 import SummaryCards from "./_components/summary-cards";
@@ -22,18 +24,30 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   const startDate = from ? new Date(from) : startOfMonth(new Date());
   const endDate = to ? new Date(to) : endOfMonth(new Date());
 
-  const [summaryResult, recentResult, chartResult] = await Promise.all([
+  const [
+    summaryResult,
+    recentResult,
+    chartResult,
+    categoriesResult,
+    clientsResult,
+  ] = await Promise.all([
     getDashboardSummary(startDate, endDate),
     getTransactions({ from: startDate, to: endDate }),
-    // O gráfico do dashboard sempre usa o mês atual como centro
     getChartData(new Date()),
+    getCategories(),
+    getClients(),
   ]);
 
   const recentTransactions = recentResult.success
     ? recentResult.data.slice(0, 8)
     : [];
-
   const chartData = chartResult.success ? chartResult.data : [];
+  const categories = categoriesResult.success
+    ? categoriesResult.data.map((c) => ({ value: c.id, label: c.name }))
+    : [];
+  const clients = clientsResult.success
+    ? clientsResult.data.map((c) => ({ value: c.id, label: c.name }))
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,7 +57,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
       </div>
       <div className="flex justify-between">
         <DatePickerWithRange />
-        <AddTransactionButton />
+        <AddTransactionButtonWrapper />
       </div>
 
       {/* 2. CARDS DE RESUMO (2/3) + GRÁFICO PREVIEW (1/3) */}
@@ -71,7 +85,11 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
             <Link href="/transactions">Ver mais</Link>
           </Button>
         </div>
-        <TransactionsTable transactions={recentTransactions} />
+        <TransactionsTable
+          transactions={recentTransactions}
+          categories={categories}
+          clients={clients}
+        />
       </div>
     </div>
   );

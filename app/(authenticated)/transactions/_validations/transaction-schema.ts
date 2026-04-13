@@ -12,6 +12,7 @@ export const transactionSchema = z
       message: "O tipo de transação é obrigatório",
     }),
     categoryId: z.string().optional(),
+    clientId: z.string().optional(),
     paymentMethod: z.nativeEnum(PaymentMethod, {
       message: "O método de pagamento é obrigatório",
     }),

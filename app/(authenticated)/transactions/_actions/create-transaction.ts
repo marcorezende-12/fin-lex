@@ -103,6 +103,7 @@ export async function createTransaction(
     amount,
     type,
     categoryId,
+    clientId,
     paymentMethod,
     date,
     installments,
@@ -119,7 +120,7 @@ export async function createTransaction(
     return { success: false, error: "Usuário não encontrado" };
   }
 
-  // 4. Valida categoryId contra o banco para evitar FK inválida
+  // 4. Valida categoryId e clientId contra o banco para evitar FK inválida
   if (categoryId) {
     const category = await db.category.findFirst({
       where: { id: categoryId, userId: user.id, deletedAt: null },
@@ -130,6 +131,20 @@ export async function createTransaction(
       return {
         success: false,
         error: "Categoria inválida ou não pertence ao usuário",
+      };
+    }
+  }
+
+  if (clientId) {
+    const client = await db.client.findFirst({
+      where: { id: clientId, userId: user.id, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!client) {
+      return {
+        success: false,
+        error: "Cliente inválido ou não pertence ao usuário",
       };
     }
   }
@@ -173,7 +188,7 @@ export async function createTransaction(
         await tx.transaction.createMany({
           data: normalizedInstallments.map((installment) => ({
             userId: user.id,
-            clientId: null,
+            clientId: clientId ?? null,
             categoryId: categoryId ?? null,
             installmentPlanId: plan.id,
             name,
@@ -192,7 +207,7 @@ export async function createTransaction(
       await db.transaction.create({
         data: {
           userId: user.id,
-          clientId: null,
+          clientId: clientId ?? null,
           categoryId: categoryId ?? null,
           name,
           description: description ?? null,

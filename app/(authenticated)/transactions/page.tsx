@@ -4,8 +4,10 @@ import {
   TransactionType,
 } from "@prisma/client";
 
+import { getCategories } from "../settings/_actions/category-actions";
+import { getClients } from "../settings/_actions/client-actions";
 import { getTransactions } from "./_actions/get-transactions";
-import { AddTransactionButton } from "./_components/transaction-dialog";
+import { AddTransactionButtonWrapper } from "./_components/add-transaction-button-wrapper";
 import { TransactionFilters } from "./_components/transaction-filters";
 import { TransactionsTable } from "./_components/transactions-table";
 
@@ -23,16 +25,26 @@ interface TransactionsPageProps {
 const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
   const { search, type, status, paymentMethod, from, to } = await searchParams;
 
-  const result = await getTransactions({
-    search,
-    type: type as TransactionType | undefined,
-    status: status as TransactionStatus | undefined,
-    paymentMethod: paymentMethod as PaymentMethod | undefined,
-    from: from ? new Date(from) : undefined,
-    to: to ? new Date(to) : undefined,
-  });
+  const [result, categoriesResult, clientsResult] = await Promise.all([
+    getTransactions({
+      search,
+      type: type as TransactionType | undefined,
+      status: status as TransactionStatus | undefined,
+      paymentMethod: paymentMethod as PaymentMethod | undefined,
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+    }),
+    getCategories(),
+    getClients(),
+  ]);
 
   const transactions = result.success ? result.data : [];
+  const categories = categoriesResult.success
+    ? categoriesResult.data.map((c) => ({ value: c.id, label: c.name }))
+    : [];
+  const clients = clientsResult.success
+    ? clientsResult.data.map((c) => ({ value: c.id, label: c.name }))
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,7 +59,7 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
               : "movimentações encontradas"}
           </p>
         </div>
-        <AddTransactionButton />
+        <AddTransactionButtonWrapper />
       </div>
 
       {/* FILTROS */}
@@ -59,7 +71,11 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
       )}
 
       {/* TABELA */}
-      <TransactionsTable transactions={transactions} />
+      <TransactionsTable
+        transactions={transactions}
+        categories={categories}
+        clients={clients}
+      />
     </div>
   );
 };

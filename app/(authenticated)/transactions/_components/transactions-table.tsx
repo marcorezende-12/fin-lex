@@ -19,7 +19,14 @@ import {
 import { formatCurrency } from "@/app/_lib/utils";
 
 import { TransactionRow } from "../_actions/get-transactions";
+import { DeleteTransactionButton } from "./delete-transaction-button";
+import { EditTransactionDialog } from "./edit-transaction-dialog";
 import { TransactionStatusCheckbox } from "./transaction-status-checkbox";
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   PIX: "Pix",
@@ -70,9 +77,15 @@ function StatusBadge({ status }: { status: TransactionStatus }) {
 
 interface TransactionsTableProps {
   transactions: TransactionRow[];
+  categories?: SelectOption[];
+  clients?: SelectOption[];
 }
 
-export function TransactionsTable({ transactions }: TransactionsTableProps) {
+export function TransactionsTable({
+  transactions,
+  categories = [],
+  clients = [],
+}: TransactionsTableProps) {
   if (transactions.length === 0) {
     return (
       <div className="border-border bg-card flex min-h-[200px] items-center justify-center rounded-2xl border p-6 shadow-sm">
@@ -110,9 +123,10 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
               <TableHead className="text-muted-foreground font-medium">
                 Parcela
               </TableHead>
-              <TableHead className="text-muted-foreground pr-6 text-right font-medium">
+              <TableHead className="text-muted-foreground font-medium">
                 Valor
               </TableHead>
+              <TableHead className="pr-6 text-right" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -179,11 +193,26 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
 
                   {/* VALOR */}
                   <TableCell
-                    className={`py-4 pr-6 text-right font-semibold ${
+                    className={`py-4 font-semibold ${
                       isExpense ? "text-destructive" : "text-primary"
                     }`}
                   >
                     {amountFormatted}
+                  </TableCell>
+
+                  {/* AÇÕES */}
+                  <TableCell className="py-4 pr-6 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <EditTransactionDialog
+                        transaction={transaction}
+                        categories={categories}
+                        clients={clients}
+                      />
+                      <DeleteTransactionButton
+                        transactionId={transaction.id}
+                        transactionName={transaction.name}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               );

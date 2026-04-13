@@ -15,12 +15,24 @@ import {
 
 import { TransactionForm } from "./transaction-form";
 
-export function AddTransactionButton() {
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface AddTransactionButtonProps {
+  categories?: SelectOption[];
+  clients?: SelectOption[];
+}
+
+export function AddTransactionButton({
+  categories = [],
+  clients = [],
+}: AddTransactionButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {/* O botão que abre o modal fica envolvido pelo DialogTrigger */}
       <DialogTrigger asChild>
         <Button className="cursor-pointer font-bold">
           <PlusIcon size={4} className="mr-2" />
@@ -28,7 +40,6 @@ export function AddTransactionButton() {
         </Button>
       </DialogTrigger>
 
-      {/* O conteúdo do modal */}
       <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Adicionar Transação</DialogTitle>
@@ -39,6 +50,8 @@ export function AddTransactionButton() {
 
         <div className="flex-1 overflow-y-auto py-4 pr-2">
           <TransactionForm
+            categories={categories}
+            clients={clients}
             onSuccess={() => setIsOpen(false)}
             onCancel={() => setIsOpen(false)}
           />
