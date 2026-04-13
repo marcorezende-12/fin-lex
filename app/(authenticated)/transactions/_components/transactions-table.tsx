@@ -3,7 +3,7 @@ import {
   TransactionStatus,
   TransactionType,
 } from "@prisma/client";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Badge } from "@/app/_components/ui/badge";
@@ -16,6 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/app/_components/ui/tooltip";
 import { formatCurrency } from "@/app/_lib/utils";
 
 import { TransactionRow } from "../_actions/get-transactions";
@@ -39,39 +45,113 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   OTHER: "Outro",
 };
 
-function StatusBadge({ status }: { status: TransactionStatus }) {
+interface TooltipInfo {
+  highlight: string;
+  highlightClass: string;
+  detail: string;
+}
+
+function getStatusTooltip(
+  status: TransactionStatus,
+  dueDate: Date,
+  paidAt: Date | null,
+): TooltipInfo {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate);
+  due.setHours(0, 0, 0, 0);
+  const dueFmt = format(due, "dd/MM/yy");
+
   if (status === TransactionStatus.OVERDUE) {
-    return (
-      <Badge
-        variant="ghost"
-        className="bg-destructive/10 text-destructive hover:bg-destructive/10 gap-1.5"
-      >
-        <span className="bg-destructive h-1.5 w-1.5 rounded-full" />
-        Atrasado
-      </Badge>
-    );
+    const days = differenceInDays(today, due);
+    return {
+      highlight: `${days} dia${days !== 1 ? "s" : ""} atrasado`,
+      highlightClass: "text-destructive",
+      detail: `Data de vencimento: ${dueFmt}`,
+    };
   }
 
-  if (status === TransactionStatus.PAID) {
+  if (status === TransactionStatus.PAID && paidAt) {
+    return {
+      highlight: `Data de pagamento: ${format(new Date(paidAt), "dd/MM/yy")}`,
+      highlightClass: "text-primary",
+      detail: `Data de vencimento: ${dueFmt}`,
+    };
+  }
+
+  // PENDING — a vencer
+  const days = differenceInDays(due, today);
+  return {
+    highlight:
+      days === 0
+        ? "Vence hoje"
+        : `${days} dia${days !== 1 ? "s" : ""} para o vencimento`,
+    highlightClass: "text-blue-500",
+    detail: `Data de vencimento: ${dueFmt}`,
+  };
+}
+
+interface StatusBadgeProps {
+  status: TransactionStatus;
+  dueDate: Date;
+  paidAt: Date | null;
+}
+
+function StatusBadge({ status, dueDate, paidAt }: StatusBadgeProps) {
+  const tooltip = getStatusTooltip(status, dueDate, paidAt);
+
+  const badge = (() => {
+    if (status === TransactionStatus.OVERDUE) {
+      return (
+        <Badge
+          variant="ghost"
+          className="bg-destructive/10 text-destructive hover:bg-destructive/10 gap-1.5"
+        >
+          <span className="bg-destructive h-1.5 w-1.5 rounded-full" />
+          Atrasado
+        </Badge>
+      );
+    }
+
+    if (status === TransactionStatus.PAID) {
+      return (
+        <Badge
+          variant="ghost"
+          className="bg-primary/10 text-primary hover:bg-primary/10 gap-1.5"
+        >
+          <span className="bg-primary h-1.5 w-1.5 rounded-full" />
+          Pago
+        </Badge>
+      );
+    }
+
     return (
       <Badge
         variant="ghost"
-        className="bg-primary/10 text-primary hover:bg-primary/10 gap-1.5"
+        className="gap-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/10"
       >
-        <span className="bg-primary h-1.5 w-1.5 rounded-full" />
-        Pago
+        <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />A vencer
       </Badge>
     );
-  }
+  })();
 
   return (
-    <Badge
-      variant="ghost"
-      className="gap-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/10"
-    >
-      <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-      Pendente
-    </Badge>
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="cursor-default">{badge}</span>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="border-border bg-card flex flex-col gap-1 rounded-xl border px-3 py-2.5 shadow-md"
+        >
+          <p className={`text-sm font-semibold ${tooltip.highlightClass}`}>
+            {tooltip.highlight}
+          </p>
+          <p className="text-muted-foreground text-xs">{tooltip.detail}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -171,7 +251,11 @@ export function TransactionsTable({
 
                   {/* STATUS — usa o status efetivo (PENDING vencido → OVERDUE) */}
                   <TableCell className="py-4">
-                    <StatusBadge status={effectiveStatus} />
+                    <StatusBadge
+                      status={effectiveStatus}
+                      dueDate={transaction.dueDate}
+                      paidAt={transaction.paidAt}
+                    />
                   </TableCell>
 
                   {/* DATA DE VENCIMENTO */}
