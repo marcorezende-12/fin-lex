@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 
-import { ChartLineMultiple } from "../charts/_components/line-chart";
+import { getChartData } from "../charts/_actions/get-chart-data";
+import { ChartPreview } from "../charts/_components/chart-preview";
 import { getTransactions } from "../transactions/_actions/get-transactions";
 import { AddTransactionButton } from "../transactions/_components/transaction-dialog";
 import { TransactionsTable } from "../transactions/_components/transactions-table";
@@ -18,18 +19,21 @@ interface DashboardPageProps {
 const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   const { from, to } = await searchParams;
 
-  // Usa o mês atual como padrão se não houver filtro de data na URL
   const startDate = from ? new Date(from) : startOfMonth(new Date());
   const endDate = to ? new Date(to) : endOfMonth(new Date());
 
-  const [result, recentResult] = await Promise.all([
+  const [summaryResult, recentResult, chartResult] = await Promise.all([
     getDashboardSummary(startDate, endDate),
     getTransactions({ from: startDate, to: endDate }),
+    // O gráfico do dashboard sempre usa o mês atual como centro
+    getChartData(new Date()),
   ]);
 
   const recentTransactions = recentResult.success
     ? recentResult.data.slice(0, 8)
     : [];
+
+  const chartData = chartResult.success ? chartResult.data : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,20 +46,20 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
         <AddTransactionButton />
       </div>
 
-      {/* 2. DIVISÃO DA TELA: 2/3 (Cards) e 1/3 (Gráfico) */}
+      {/* 2. CARDS DE RESUMO (2/3) + GRÁFICO PREVIEW (1/3) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* ESQUERDA: Cards de resumo */}
         <div className="h-[400px] lg:col-span-2">
-          {result.success ? (
-            <SummaryCards summary={result.data} />
+          {summaryResult.success ? (
+            <SummaryCards summary={summaryResult.data} />
           ) : (
             <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
               Não foi possível carregar o resumo financeiro.
             </div>
           )}
         </div>
+
         <div className="h-[400px]">
-          <ChartLineMultiple />
+          <ChartPreview data={chartData} />
         </div>
       </div>
 

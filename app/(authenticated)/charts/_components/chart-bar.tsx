@@ -1,14 +1,7 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { Button } from "@/app/_components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/app/_components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -17,65 +10,103 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/app/_components/ui/chart";
+import { formatCurrency } from "@/app/_lib/utils";
 
-export const description = "A stacked bar chart with a legend";
-
-const chartData = [
-  { month: "January", income: 186, expense: 80 },
-  { month: "February", income: 305, expense: 200 },
-  { month: "March", income: 237, expense: 120 },
-  { month: "April", income: 73, expense: 190 },
-  { month: "May", income: 209, expense: 130 },
-];
+import { ChartDataPoint } from "../_actions/get-chart-data";
 
 const chartConfig = {
   income: {
-    label: "Receita",
+    label: "Receita Real",
     color: "var(--chart-1)",
   },
   expense: {
-    label: "Despesa",
+    label: "Despesa Real",
     color: "var(--color-destructive)",
+  },
+  expectedIncome: {
+    label: "Receita Prevista",
+    color: "var(--chart-2)",
+  },
+  expectedExpense: {
+    label: "Despesa Prevista",
+    color: "var(--chart-4)",
   },
 } satisfies ChartConfig;
 
-export function ChartBarStacked() {
+interface ChartBarStackedProps {
+  data: ChartDataPoint[];
+  compact?: boolean;
+}
+
+export function ChartBarStacked({
+  data,
+  compact = false,
+}: ChartBarStackedProps) {
   return (
-    <Card className="bg-card border-border flex h-[400px] flex-col overflow-hidden rounded-2xl shadow-sm">
-      <CardHeader className="flex shrink-0 flex-row items-center justify-between">
-        <CardTitle>Receitas e Despesas</CardTitle>
-        <Button variant="outline" className="cursor-pointer justify-end">
-          Ver mais
-        </Button>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden pb-4">
-        <ChartContainer config={chartConfig} className="h-full w-full">
-          <BarChart accessibilityLayer data={chartData}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+    <ChartContainer config={chartConfig} className="h-full w-full">
+      <BarChart
+        accessibilityLayer
+        data={data}
+        margin={{ left: 8, right: 8, top: 8, bottom: 0 }}
+      >
+        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+        <XAxis
+          dataKey="month"
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          tick={{ fontSize: 12 }}
+        />
+        {!compact && (
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fontSize: 11 }}
+            tickFormatter={(v: number) =>
+              v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
+            }
+          />
+        )}
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              formatter={(value) => formatCurrency(Number(value))}
             />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <ChartLegend content={<ChartLegendContent />} />
+          }
+        />
+        <ChartLegend content={<ChartLegendContent />} />
+        <Bar
+          dataKey="income"
+          stackId="real"
+          fill="var(--color-income)"
+          radius={[0, 0, 4, 4]}
+        />
+        <Bar
+          dataKey="expense"
+          stackId="real"
+          fill="var(--color-expense)"
+          radius={[4, 4, 0, 0]}
+        />
+        {!compact && (
+          <>
             <Bar
-              dataKey="income"
-              stackId="a"
-              fill="var(--color-income)"
+              dataKey="expectedIncome"
+              stackId="expected"
+              fill="var(--color-expectedIncome)"
               radius={[0, 0, 4, 4]}
+              fillOpacity={0.5}
             />
             <Bar
-              dataKey="expense"
-              stackId="a"
-              fill="var(--color-expense)"
+              dataKey="expectedExpense"
+              stackId="expected"
+              fill="var(--color-expectedExpense)"
               radius={[4, 4, 0, 0]}
+              fillOpacity={0.5}
             />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+          </>
+        )}
+      </BarChart>
+    </ChartContainer>
   );
 }
