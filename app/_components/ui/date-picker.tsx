@@ -1,7 +1,9 @@
 "use client";
 
-import { addDays, format } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { type DateRange } from "react-day-picker";
 
@@ -11,10 +13,35 @@ import { Field } from "./field";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 export function DatePickerWithRange() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Lê as datas da URL; se não existirem, usa o mês atual como padrão
+  const initialFrom = searchParams.get("from")
+    ? new Date(searchParams.get("from") as string)
+    : startOfMonth(new Date());
+
+  const initialTo = searchParams.get("to")
+    ? new Date(searchParams.get("to") as string)
+    : endOfMonth(new Date());
+
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), 0, 20),
-    to: addDays(new Date(new Date().getFullYear(), 0, 20), 20),
+    from: initialFrom,
+    to: initialTo,
   });
+
+  const handleSelect = (range: DateRange | undefined) => {
+    setDate(range);
+
+    // Só navega quando o usuário tiver selecionado as duas datas
+    if (!range?.from || !range?.to) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("from", format(range.from, "yyyy-MM-dd"));
+    params.set("to", format(range.to, "yyyy-MM-dd"));
+
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <Field className="w-auto">
@@ -29,14 +56,14 @@ export function DatePickerWithRange() {
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
+                  {format(date.from, "dd MMM, yyyy", { locale: ptBR })} -{" "}
+                  {format(date.to, "dd MMM, yyyy", { locale: ptBR })}
                 </>
               ) : (
-                format(date.from, "LLL dd, y")
+                format(date.from, "dd MMM, yyyy", { locale: ptBR })
               )
             ) : (
-              <span>Pick a date</span>
+              <span>Selecionar período</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -45,8 +72,9 @@ export function DatePickerWithRange() {
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={handleSelect}
             numberOfMonths={2}
+            locale={ptBR}
           />
         </PopoverContent>
       </Popover>
