@@ -1,0 +1,116 @@
+"use client";
+
+import { CalendarIcon } from "lucide-react";
+import { useState, useTransition } from "react";
+
+import { Button } from "@/app/_components/ui/button";
+import { Calendar } from "@/app/_components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/app/_components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/app/_components/ui/popover";
+
+import { toggleTransactionStatus } from "../_actions/toggle-transaction-status";
+
+interface ConfirmPaymentDialogProps {
+  transactionId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+/**
+ * Dialog de confirmação de pagamento.
+ * Exibe um date picker para o usuário informar a data em que o pagamento ocorreu.
+ * Ao confirmar, chama a action passando a data selecionada.
+ */
+export function ConfirmPaymentDialog({
+  transactionId,
+  open,
+  onOpenChange,
+}: ConfirmPaymentDialogProps) {
+  const [paidAt, setPaidAt] = useState<Date>(new Date());
+  const [isPending, startTransition] = useTransition();
+
+  const handleConfirm = () => {
+    startTransition(async () => {
+      await toggleTransactionStatus(transactionId, paidAt);
+      onOpenChange(false);
+    });
+  };
+
+  const handleCancel = () => {
+    if (isPending) return;
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleCancel}>
+      <DialogContent className="sm:max-w-xs">
+        <DialogHeader>
+          <div className="bg-primary/10 mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full">
+            <CalendarIcon className="text-primary h-5 w-5" />
+          </div>
+          <DialogTitle className="text-center">
+            Deseja confirmar esta operação?
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* DATE PICKER */}
+        <div className="flex justify-center py-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full cursor-pointer justify-start gap-2 font-normal"
+              >
+                <CalendarIcon className="text-muted-foreground h-4 w-4" />
+                {paidAt.toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "2-digit",
+                })}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={paidAt}
+                onSelect={(date) => {
+                  if (date) setPaidAt(date);
+                }}
+                disabled={(date) => date > new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <DialogFooter className="grid grid-cols-2 gap-3">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isPending}
+            className="cursor-pointer"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={isPending}
+            className="cursor-pointer"
+          >
+            {isPending ? "Salvando..." : "Confirmar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

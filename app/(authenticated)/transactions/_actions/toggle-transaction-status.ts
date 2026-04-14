@@ -10,11 +10,12 @@ type ActionResult = { success: true } | { success: false; error: string };
 
 /**
  * Alterna o status de uma transação entre PAID e PENDING.
- * Se estiver PENDING/OVERDUE → marca como PAID (define paidAt).
+ * Se estiver PENDING/OVERDUE → marca como PAID usando a data informada (ou now).
  * Se estiver PAID → reverte para PENDING (limpa paidAt).
  */
 export async function toggleTransactionStatus(
   transactionId: string,
+  paidAt?: Date,
 ): Promise<ActionResult> {
   const { userId: clerkId } = await auth();
 
@@ -51,7 +52,7 @@ export async function toggleTransactionStatus(
     where: { id: transaction.id },
     data: {
       status: isPaid ? TransactionStatus.PENDING : TransactionStatus.PAID,
-      paidAt: isPaid ? null : new Date(),
+      paidAt: isPaid ? null : (paidAt ?? new Date()),
     },
   });
 

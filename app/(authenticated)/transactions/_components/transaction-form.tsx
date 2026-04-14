@@ -35,15 +35,14 @@ import { cn, formatCurrency } from "@/app/_lib/utils";
 
 import { createTransaction } from "../_actions/create-transaction";
 import {
+  SelectOption,
+  TYPE_OPTIONS as TRANSACTION_TYPE_OPTIONS,
+} from "../_types";
+import {
   TransactionInput,
   transactionSchema,
 } from "../_validations/transaction-schema";
 import { InstallmentsDialog } from "./installments-dialog";
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
 
 interface TransactionFormProps {
   onSuccess: () => void;
@@ -52,6 +51,7 @@ interface TransactionFormProps {
   clients?: SelectOption[];
 }
 
+// Label expandido para o formulário de criação (mais descritivo que o filtro)
 const PAYMENT_METHOD_OPTIONS = [
   { value: PaymentMethod.PIX, label: "Pix" },
   { value: PaymentMethod.CREDIT_CARD, label: "Cartão de Crédito" },
@@ -61,11 +61,6 @@ const PAYMENT_METHOD_OPTIONS = [
   { value: PaymentMethod.CASH, label: "Dinheiro" },
   { value: PaymentMethod.INSTALLMENT, label: "Parcelado" },
   { value: PaymentMethod.OTHER, label: "Outro" },
-];
-
-const TRANSACTION_TYPE_OPTIONS = [
-  { value: TransactionType.INCOME, label: "Receita" },
-  { value: TransactionType.EXPENSE, label: "Despesa" },
 ];
 
 export function TransactionForm({

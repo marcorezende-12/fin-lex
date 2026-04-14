@@ -13,12 +13,8 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 
+import { SelectOption } from "../_types";
 import { TransactionForm } from "./transaction-form";
-
-export interface SelectOption {
-  value: string;
-  label: string;
-}
 
 interface AddTransactionButtonProps {
   categories?: SelectOption[];

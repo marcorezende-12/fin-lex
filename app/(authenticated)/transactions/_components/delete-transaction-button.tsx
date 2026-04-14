@@ -1,7 +1,6 @@
 "use client";
 
-import { Trash2Icon } from "lucide-react";
-import { AlertTriangleIcon } from "lucide-react";
+import { AlertTriangleIcon, Trash2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/app/_components/ui/button";

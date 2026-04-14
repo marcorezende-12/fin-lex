@@ -44,6 +44,11 @@ import { cn, formatCurrency } from "@/app/_lib/utils";
 
 import { TransactionRow } from "../_actions/get-transactions";
 import { updateTransaction } from "../_actions/update-transaction";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  SelectOption,
+  TYPE_OPTIONS as TRANSACTION_TYPE_OPTIONS,
+} from "../_types";
 
 // Schema de edição — idêntico ao transactionSchema mas sem z.coerce no amount,
 // pois no modo de edição o valor já chega como number do formulário.
@@ -60,32 +65,11 @@ const editTransactionSchema = z.object({
 
 type EditTransactionValues = z.infer<typeof editTransactionSchema>;
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
 interface EditTransactionDialogProps {
   transaction: TransactionRow;
   categories?: SelectOption[];
   clients?: SelectOption[];
 }
-
-const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
-  { value: PaymentMethod.PIX, label: "Pix" },
-  { value: PaymentMethod.CREDIT_CARD, label: "Cartão de Crédito" },
-  { value: PaymentMethod.DEBIT_CARD, label: "Cartão de Débito" },
-  { value: PaymentMethod.BOLETO, label: "Boleto" },
-  { value: PaymentMethod.BANK_TRANSFER, label: "Transferência Bancária" },
-  { value: PaymentMethod.CASH, label: "Dinheiro" },
-  { value: PaymentMethod.INSTALLMENT, label: "Parcelado" },
-  { value: PaymentMethod.OTHER, label: "Outro" },
-];
-
-const TRANSACTION_TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
-  { value: TransactionType.INCOME, label: "Receita" },
-  { value: TransactionType.EXPENSE, label: "Despesa" },
-];
 
 export function EditTransactionDialog({
   transaction,

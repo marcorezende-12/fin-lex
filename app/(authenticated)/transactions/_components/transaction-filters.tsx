@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  PaymentMethod,
-  TransactionStatus,
-  TransactionType,
-} from "@prisma/client";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
@@ -19,27 +14,11 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 
-const TYPE_OPTIONS: { value: TransactionType; label: string }[] = [
-  { value: TransactionType.INCOME, label: "Receita" },
-  { value: TransactionType.EXPENSE, label: "Despesa" },
-];
-
-const STATUS_OPTIONS: { value: TransactionStatus; label: string }[] = [
-  { value: TransactionStatus.PENDING, label: "Pendente" },
-  { value: TransactionStatus.PAID, label: "Pago" },
-  { value: TransactionStatus.OVERDUE, label: "Atrasado" },
-];
-
-const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
-  { value: PaymentMethod.PIX, label: "Pix" },
-  { value: PaymentMethod.CREDIT_CARD, label: "Cartão de Crédito" },
-  { value: PaymentMethod.DEBIT_CARD, label: "Cartão de Débito" },
-  { value: PaymentMethod.BOLETO, label: "Boleto" },
-  { value: PaymentMethod.BANK_TRANSFER, label: "Transferência" },
-  { value: PaymentMethod.CASH, label: "Dinheiro" },
-  { value: PaymentMethod.INSTALLMENT, label: "Parcelado" },
-  { value: PaymentMethod.OTHER, label: "Outro" },
-];
+import {
+  PAYMENT_METHOD_OPTIONS,
+  STATUS_OPTIONS,
+  TYPE_OPTIONS,
+} from "../_types";
 
 const ALL_VALUE = "all";
 
