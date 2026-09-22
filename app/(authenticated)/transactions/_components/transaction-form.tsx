@@ -75,6 +75,7 @@ export function TransactionForm({
   const [isInstallmentsDialogOpen, setIsInstallmentsDialogOpen] =
     useState(false);
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   const form = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema),
@@ -339,7 +340,10 @@ export function TransactionForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Data *</FormLabel>
-                <Popover>
+                <Popover
+                  open={isDatePopoverOpen}
+                  onOpenChange={setIsDatePopoverOpen}
+                >
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
@@ -362,7 +366,10 @@ export function TransactionForm({
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                        setIsDatePopoverOpen(false);
+                      }}
                       initialFocus
                     />
                   </PopoverContent>

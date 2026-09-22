@@ -39,6 +39,7 @@ export function ConfirmPaymentDialog({
 }: ConfirmPaymentDialogProps) {
   const [paidAt, setPaidAt] = useState<Date>(new Date());
   const [isPending, startTransition] = useTransition();
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   const handleConfirm = () => {
     startTransition(async () => {
@@ -71,7 +72,7 @@ export function ConfirmPaymentDialog({
 
         {/* DATE PICKER */}
         <div className="flex justify-center py-1">
-          <Popover>
+          <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -91,6 +92,7 @@ export function ConfirmPaymentDialog({
                 selected={paidAt}
                 onSelect={(date) => {
                   if (date) setPaidAt(date);
+                  setIsDatePopoverOpen(false);
                 }}
                 disabled={(date) => date > new Date()}
                 initialFocus

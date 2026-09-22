@@ -49,11 +49,13 @@ export function RecurringDialog({
 }: RecurringDialogProps) {
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setHasEndDate(!!defaultEndDate);
       setEndDate(defaultEndDate ?? undefined);
+      setIsDatePopoverOpen(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -93,7 +95,10 @@ export function RecurringDialog({
           </div>
 
           {hasEndDate ? (
-            <Popover>
+            <Popover
+              open={isDatePopoverOpen}
+              onOpenChange={setIsDatePopoverOpen}
+            >
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -115,7 +120,10 @@ export function RecurringDialog({
                 <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={setEndDate}
+                  onSelect={(date) => {
+                    setEndDate(date);
+                    setIsDatePopoverOpen(false);
+                  }}
                   disabled={(date) => date < startDate}
                   initialFocus
                 />

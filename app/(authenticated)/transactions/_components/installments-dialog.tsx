@@ -70,6 +70,11 @@ export function InstallmentsDialog({
     null,
   );
   const [editValue, setEditValue] = useState<string>("");
+  const [isHeaderDatePopoverOpen, setIsHeaderDatePopoverOpen] = useState(false);
+  // Só uma linha por vez pode ter o popover de data aberto.
+  const [openRowDatePopoverIndex, setOpenRowDatePopoverIndex] = useState<
+    number | null
+  >(null);
 
   // To prevent overriding initial data when the dialog opens, we track if it's a manual edit.
   const [isUserEditingHeader, setIsUserEditingHeader] = useState(false);
@@ -234,6 +239,7 @@ export function InstallmentsDialog({
   };
 
   const handleDateEdit = (index: number, newDate: Date | undefined) => {
+    setOpenRowDatePopoverIndex(null);
     if (!newDate) return;
     const updatedInstallments = [...installments];
     updatedInstallments[index].date = newDate;
@@ -252,7 +258,10 @@ export function InstallmentsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-2xl">
+      <DialogContent
+        scrollable={false}
+        className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-2xl"
+      >
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-center text-xl font-semibold">
             Configurar Parcela
@@ -310,7 +319,10 @@ export function InstallmentsDialog({
           {/* DATA */}
           <div className="flex flex-col justify-center space-y-2">
             <label className="text-sm leading-none font-medium">Data *</label>
-            <Popover>
+            <Popover
+              open={isHeaderDatePopoverOpen}
+              onOpenChange={setIsHeaderDatePopoverOpen}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
@@ -336,6 +348,7 @@ export function InstallmentsDialog({
                       setIsUserEditingHeader(true);
                       setLocalStartDate(date);
                     }
+                    setIsHeaderDatePopoverOpen(false);
                   }}
                   initialFocus
                 />
@@ -372,7 +385,12 @@ export function InstallmentsDialog({
                       {installment.number}
                     </TableCell>
                     <TableCell>
-                      <Popover>
+                      <Popover
+                        open={openRowDatePopoverIndex === index}
+                        onOpenChange={(open) =>
+                          setOpenRowDatePopoverIndex(open ? index : null)
+                        }
+                      >
                         <PopoverTrigger asChild>
                           <Button
                             variant="ghost"

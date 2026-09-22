@@ -51,9 +51,22 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  scrollable = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /**
+   * Quando true (padrão), o conteúdo fica numa área própria com rolagem e
+   * altura máxima de tela — sem isso, um conteúdo mais alto que a viewport
+   * empurrava os botões (inclusive o de fechar) pra fora da área visível,
+   * só alcançáveis dando zoom out no navegador. Dialogs que já controlam a
+   * própria rolagem internamente (cabeçalho fixo + só uma parte rolando,
+   * ex: InstallmentsDialog, AddTransactionButton) passam false: o Content
+   * continua limitado a max-h-[90dvh]/flex-col, mas sem essa segunda
+   * camada de rolagem, deixando os filhos (com seus próprios flex-1/
+   * min-h-0/overflow-y-auto) se organizarem sozinhos.
+   */
+  scrollable?: boolean;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -61,15 +74,19 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg",
-          // Mobile (< sm): vira um bottom sheet ancorado embaixo, com rolagem
-          // interna, altura em dvh (respeita barras do navegador) e safe-area.
-          "max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-h-[92dvh] max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:overflow-y-auto max-sm:rounded-t-2xl max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:p-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]",
+          "bg-background data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 flex max-h-[90dvh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] flex-col overflow-hidden rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg",
+          // Mobile (< sm): vira um bottom sheet ancorado embaixo, com
+          // altura em dvh (respeita barras do navegador) e safe-area.
+          "max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=closed]:zoom-out-100 max-sm:data-[state=open]:slide-in-from-bottom max-sm:data-[state=open]:zoom-in-100 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-h-[92dvh] max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-2xl max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:p-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]",
           className,
         )}
         {...props}
       >
-        {children}
+        {scrollable ? (
+          <div className="grid gap-4 overflow-y-auto">{children}</div>
+        ) : (
+          children
+        )}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"

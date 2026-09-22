@@ -85,6 +85,7 @@ export function EditTransactionDialog({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isCancellingRecurring, setIsCancellingRecurring] = useState(false);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [isCancelPending, startCancelTransition] = useTransition();
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
   const [isConfigPending, startConfigTransition] = useTransition();
@@ -403,7 +404,10 @@ export function EditTransactionDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Data de vencimento *</FormLabel>
-                    <Popover>
+                    <Popover
+                      open={isDatePopoverOpen}
+                      onOpenChange={setIsDatePopoverOpen}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -426,7 +430,10 @@ export function EditTransactionDialog({
                         <Calendar
                           mode="single"
                           selected={field.value}
-                          onSelect={field.onChange}
+                          onSelect={(date) => {
+                            field.onChange(date);
+                            setIsDatePopoverOpen(false);
+                          }}
                           initialFocus
                         />
                       </PopoverContent>

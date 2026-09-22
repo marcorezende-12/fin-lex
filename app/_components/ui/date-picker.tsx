@@ -32,12 +32,16 @@ export function DatePickerWithRange() {
     from: initialFrom,
     to: initialTo,
   });
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const handleSelect = (range: DateRange | undefined) => {
     setDate(range);
 
-    // Só navega quando o usuário tiver selecionado as duas datas
+    // Só navega e fecha o popover quando o usuário tiver selecionado as
+    // duas datas — no clique do "from" o range ainda está incompleto.
     if (!range?.from || !range?.to) return;
+
+    setIsOpen(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("from", format(range.from, "yyyy-MM-dd"));
@@ -48,7 +52,7 @@ export function DatePickerWithRange() {
 
   return (
     <Field className="w-auto">
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
