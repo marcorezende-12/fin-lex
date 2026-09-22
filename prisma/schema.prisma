@@ -47,7 +47,8 @@ model User {
   email                 String   @unique
   role                  Role     @default(USER)
   avatarUrl             String?
-  
+  cpfCnpj               String?
+
   // Novo campo adicionado
   onboardingCompleted   Boolean  @default(false)
 
@@ -60,6 +61,7 @@ model User {
   categories            Category[]
   transactions          Transaction[]
   installmentPlans      InstallmentPlan[]
+  receiptTemplate       ReceiptTemplate?
 
   @@index([clerkId])
   @@index([deletedAt])
@@ -105,7 +107,9 @@ model Category {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
-  @@unique([userId, name])
+  // Inclui deletedAt na chave única para que uma categoria excluída (soft
+  // delete) não bloqueie a criação de uma nova categoria com o mesmo nome.
+  @@unique([userId, name, deletedAt])
   @@index([userId])
   @@index([deletedAt])
 }
@@ -162,4 +166,21 @@ model Transaction {
   @@index([userId, type, status])
   @@index([installmentPlanId])
   @@index([deletedAt])
+}
+
+model ReceiptTemplate {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+
+  logoDataUrl String?  @db.Text
+  title       String   @default("[Nome do Escritório]")
+  subtitle    String   @default("Escritório de Advocacia")
+  bodyText    String   @db.Text
+  closingText String   @default("Por ser verdade, firmo presente.")
+  footerText  String?  @db.Text
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

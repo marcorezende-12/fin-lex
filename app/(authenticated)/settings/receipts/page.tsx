@@ -3,7 +3,13 @@ import Link from "next/link";
 
 import { Button } from "@/app/_components/ui/button";
 
-const ReceiptsPage = () => {
+import { getReceiptTemplate } from "../_actions/receipt-template-actions";
+import { ReceiptSettingsEditor } from "./_components/receipt-settings-editor";
+
+const ReceiptsPage = async () => {
+  const result = await getReceiptTemplate();
+  const template = result.success ? result.data : null;
+
   return (
     <div className="flex flex-col gap-6">
       {/* CABEÇALHO */}
@@ -29,18 +35,7 @@ const ReceiptsPage = () => {
         </div>
       </div>
 
-      {/* PLACEHOLDER */}
-      <div className="border-border bg-card flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border p-8 shadow-sm">
-        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-2xl">
-          <FileTextIcon className="text-muted-foreground h-7 w-7" />
-        </div>
-        <div className="text-center">
-          <p className="font-semibold">Em breve</p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            A funcionalidade de recibos está sendo desenvolvida.
-          </p>
-        </div>
-      </div>
+      <ReceiptSettingsEditor template={template} />
     </div>
   );
 };
