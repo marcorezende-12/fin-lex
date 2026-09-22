@@ -79,14 +79,23 @@ const OverdueReportPage = async () => {
                   </TableHeader>
                   <TableBody>
                     {result.data.clients.map((row) => (
-                      <TableRow key={row.clientId} className="border-border/50">
+                      <TableRow
+                        key={row.clientId ?? "sem-cliente"}
+                        className="border-border/50"
+                      >
                         <TableCell className="pl-6 font-medium">
-                          <Link
-                            href={`/settings/clients/${row.clientId}`}
-                            className="hover:underline"
-                          >
-                            {row.clientName}
-                          </Link>
+                          {row.clientId ? (
+                            <Link
+                              href={`/settings/clients/${row.clientId}`}
+                              className="hover:underline"
+                            >
+                              {row.clientName}
+                            </Link>
+                          ) : (
+                            <span className="text-muted-foreground italic">
+                              {row.clientName}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell className="text-muted-foreground text-center">
                           {row.transactionCount}

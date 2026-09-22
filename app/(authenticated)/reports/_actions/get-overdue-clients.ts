@@ -9,7 +9,9 @@ import { resolveUser } from "@/app/_lib/resolve-user";
 import { TransactionStatus } from "@/generated/prisma";
 
 export interface OverdueClientRow {
-  clientId: string;
+  /** null = movimentações atrasadas sem cliente vinculado (mesmo assim
+   * entram no relatório — nada fica escondido só por faltar o vínculo). */
+  clientId: string | null;
   clientName: string;
   totalOverdueInCents: number;
   transactionCount: number;
@@ -42,6 +44,9 @@ export async function getOverdueClients(): Promise<
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Sem o filtro clientId: { not: null } de propósito — o groupBy agrupa
+  // as sem cliente vinculado num bucket clientId=null só delas, e isso
+  // ainda entra no relatório em vez de ser descartado silenciosamente.
   const groups = await db.transaction.groupBy({
     by: ["clientId"],
     where: {
@@ -49,7 +54,6 @@ export async function getOverdueClients(): Promise<
       deletedAt: null,
       status: TransactionStatus.PENDING,
       dueDate: { lt: today },
-      clientId: { not: null },
     },
     _sum: { amountInCents: true },
     _count: { _all: true },
@@ -63,7 +67,9 @@ export async function getOverdueClients(): Promise<
     };
   }
 
-  const clientIds = groups.map((g) => g.clientId as string);
+  const clientIds = groups
+    .map((g) => g.clientId)
+    .filter((id): id is string => id !== null);
   const clients = await db.client.findMany({
     where: { id: { in: clientIds } },
     select: { id: true, name: true },
@@ -73,9 +79,13 @@ export async function getOverdueClients(): Promise<
   const rows: OverdueClientRow[] = groups
     .map((g) => {
       const oldestDueDate = g._min.dueDate as Date;
+      const clientName =
+        g.clientId === null
+          ? "Sem cliente vinculado"
+          : (nameById.get(g.clientId) ?? "Cliente removido");
       return {
-        clientId: g.clientId as string,
-        clientName: nameById.get(g.clientId as string) ?? "Cliente removido",
+        clientId: g.clientId,
+        clientName,
         totalOverdueInCents: g._sum.amountInCents ?? 0,
         transactionCount: g._count._all,
         oldestDueDate,

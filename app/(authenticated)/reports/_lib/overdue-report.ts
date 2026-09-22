@@ -9,17 +9,31 @@ import { OverdueReport } from "../_actions/get-overdue-clients";
  */
 export function buildOverdueNarrative(report: OverdueReport): string {
   if (report.clients.length === 0) {
-    return "Nenhum cliente está com movimentações em atraso no momento.";
+    return "Nenhuma movimentação em atraso no momento.";
+  }
+
+  // A linha "Sem cliente vinculado" (clientId null) não é um cliente de
+  // verdade — separa pra não dizer "N clientes" contando ela junto.
+  const clientCount = report.clients.filter((c) => c.clientId !== null).length;
+  const hasUnlinked = report.clients.some((c) => c.clientId === null);
+
+  const total = formatCurrency(report.totalOverdueInCents / 100);
+
+  if (clientCount === 0) {
+    return (
+      `Há movimentações em atraso sem cliente vinculado, totalizando ` +
+      `${total} em valores pendentes até a data de hoje.`
+    );
   }
 
   const subject =
-    report.clients.length === 1
-      ? "1 cliente está"
-      : `${report.clients.length} clientes estão`;
+    clientCount === 1 ? "1 cliente está" : `${clientCount} clientes estão`;
+  const unlinkedNote = hasUnlinked
+    ? " Há também movimentações em atraso sem cliente vinculado."
+    : "";
 
   return (
     `Atualmente, ${subject} com movimentações em atraso, totalizando ` +
-    `${formatCurrency(report.totalOverdueInCents / 100)} em valores ` +
-    `pendentes até a data de hoje.`
+    `${total} em valores pendentes até a data de hoje.${unlinkedNote}`
   );
 }
