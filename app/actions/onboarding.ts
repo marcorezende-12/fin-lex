@@ -23,6 +23,9 @@ export async function completeOnboarding(formData: FormData) {
     throw new Error("Email não encontrado");
   }
 
+  const resolvedName =
+    name || `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
+
   // Verifica se o usuário já existe e já completou o onboarding
   const existingUser = await db.user.findUnique({
     where: { clerkId: clerkUserId },
@@ -33,17 +36,25 @@ export async function completeOnboarding(formData: FormData) {
     redirect("/"); // Já completou o onboarding
   }
 
-  // Cria o usuário e marca o onboarding como concluído
-  await db.user.create({
-    data: {
+  // Usa upsert em vez de create: se já existir uma linha para este clerkId
+  // (ex: registro criado por integração externa, ou uma tentativa anterior
+  // que falhou após criar o usuário mas antes do redirect), evita erro de
+  // unicidade e apenas atualiza os dados, marcando o onboarding como
+  // concluído.
+  await db.user.upsert({
+    where: { clerkId: clerkUserId },
+    create: {
       clerkId: clerkUserId,
-      email: email,
-      name:
-        name ||
-        `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim(),
+      email,
+      name: resolvedName,
       avatarUrl: clerkUser.imageUrl,
       role: "ADMIN", // Primeiro usuário sempre é ADMIN
-      onboardingCompleted: true, // ← Campo atualizado
+      onboardingCompleted: true,
+    },
+    update: {
+      name: resolvedName,
+      avatarUrl: clerkUser.imageUrl,
+      onboardingCompleted: true,
     },
   });
 
