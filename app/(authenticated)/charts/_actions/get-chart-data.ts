@@ -28,18 +28,28 @@ export interface ChartDataPoint {
   expectedExpense: number;
 }
 
+/**
+ * "months": janela de 5 meses centrada em `centerMonth` (-2 até +2) —
+ * comportamento original, bom pra comparar o presente com o entorno recente.
+ * "year": os 12 meses do ano de `centerMonth` (jan-dez) — visão anual.
+ */
+export type ChartPeriod = "months" | "year";
+
 type ActionResult =
   | { success: true; data: ChartDataPoint[] }
   | { success: false; error: string };
 
 /**
  * Retorna dados mensais agregados para os gráficos.
- * O eixo X é sempre centrado no mês de referência,
- * exibindo: 2 meses anteriores + mês atual + 2 meses posteriores (5 pontos).
  *
- * @param centerMonth Mês de referência (padrão: mês atual)
+ * @param centerMonth Mês/ano de referência (padrão: mês atual)
+ * @param period "months" (janela de 5 meses ao redor da referência, padrão)
+ *   ou "year" (os 12 meses do ano da referência)
  */
-export async function getChartData(centerMonth?: Date): Promise<ActionResult> {
+export async function getChartData(
+  centerMonth?: Date,
+  period: ChartPeriod = "months",
+): Promise<ActionResult> {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -57,19 +67,31 @@ export async function getChartData(centerMonth?: Date): Promise<ActionResult> {
 
   const center = centerMonth ?? new Date();
 
-  // Gera a janela de 5 meses: -2 até +2 em relação ao centro
-  const months = [-2, -1, 0, 1, 2].map((offset) => {
-    const date =
-      offset < 0
-        ? subMonths(center, Math.abs(offset))
-        : addMonths(center, offset);
-    return {
-      label: format(date, "MMM", { locale: ptBR }),
-      yearMonth: format(date, "yyyy-MM"),
-      start: startOfMonth(date),
-      end: endOfMonth(date),
-    };
-  });
+  const months =
+    period === "year"
+      ? // Os 12 meses (jan-dez) do ano de `center`
+        Array.from({ length: 12 }, (_, monthIndex) => {
+          const date = new Date(center.getFullYear(), monthIndex, 1);
+          return {
+            label: format(date, "MMM", { locale: ptBR }),
+            yearMonth: format(date, "yyyy-MM"),
+            start: startOfMonth(date),
+            end: endOfMonth(date),
+          };
+        })
+      : // Janela de 5 meses: -2 até +2 em relação ao centro
+        [-2, -1, 0, 1, 2].map((offset) => {
+          const date =
+            offset < 0
+              ? subMonths(center, Math.abs(offset))
+              : addMonths(center, offset);
+          return {
+            label: format(date, "MMM", { locale: ptBR }),
+            yearMonth: format(date, "yyyy-MM"),
+            start: startOfMonth(date),
+            end: endOfMonth(date),
+          };
+        });
 
   const rangeStart = months[0].start;
   const rangeEnd = months[months.length - 1].end;
@@ -124,5 +146,41 @@ export async function getChartData(centerMonth?: Date): Promise<ActionResult> {
   return {
     success: true,
     data: Array.from(dataMap.values()),
+  };
+}
+
+type YearsResult =
+  | { success: true; data: number[] }
+  | { success: false; error: string };
+
+/**
+ * Anos que têm pelo menos uma movimentação (paga ou prevista) — usado pelo
+ * seletor de ano da visão anual, pra não oferecer anos sem nenhum dado.
+ * Sempre inclui o ano atual, mesmo sem movimentações, pra o seletor nunca
+ * ficar vazio.
+ */
+export async function getAvailableChartYears(): Promise<YearsResult> {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return { success: false, error: "Não autorizado" };
+
+  const user = await db.user.findUnique({
+    where: { clerkId },
+    select: { id: true },
+  });
+  if (!user) return { success: false, error: "Usuário não encontrado" };
+
+  const transactions = await db.transaction.findMany({
+    where: { userId: user.id, deletedAt: null },
+    select: { dueDate: true },
+  });
+
+  const years = new Set<number>([new Date().getFullYear()]);
+  for (const t of transactions) {
+    years.add(new Date(t.dueDate).getFullYear());
+  }
+
+  return {
+    success: true,
+    data: Array.from(years).sort((a, b) => b - a),
   };
 }

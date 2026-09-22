@@ -37,6 +37,8 @@ export interface TransactionRow {
   clientId: string | null;
   clientName: string | null;
   recurringPlanId: string | null;
+  /** Data de término configurada no plano (null = sem término). */
+  recurringEndDate: Date | null;
 }
 
 type ActionResult =
@@ -150,6 +152,7 @@ export async function getTransactions(
       clientId: true,
       client: { select: { name: true } },
       recurringPlanId: true,
+      recurringPlan: { select: { endDate: true } },
     },
     orderBy: { dueDate: "asc" },
   });
@@ -161,6 +164,7 @@ export async function getTransactions(
       effectiveStatus: resolveEffectiveStatus(t.status, t.dueDate),
       categoryName: t.category?.name ?? null,
       clientName: t.client?.name ?? null,
+      recurringEndDate: t.recurringPlan?.endDate ?? null,
     })),
   };
 }

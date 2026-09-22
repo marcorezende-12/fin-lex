@@ -47,13 +47,35 @@ const LINE_VIEWS: { value: LineView; label: string }[] = [
   { value: "expected", label: "Previsto" },
 ];
 
-export function ChartFilters() {
+export type ChartPeriodFilter = "months" | "year";
+
+const PERIOD_OPTIONS: { value: ChartPeriodFilter; label: string }[] = [
+  { value: "months", label: "Meses" },
+  { value: "year", label: "Ano" },
+];
+
+interface ChartFiltersProps {
+  /**
+   * Anos disponíveis pro seletor da visão anual — só anos com pelo menos
+   * uma movimentação (paga ou prevista), calculados no servidor. Nunca
+   * inventa anos "vazios" fixos.
+   */
+  availableYears: number[];
+}
+
+export function ChartFilters({ availableYears }: ChartFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const chartType = (searchParams.get("chart") as ChartType) ?? "line";
   const monthOffset = searchParams.get("offset") ?? "0";
   const lineView = (searchParams.get("view") as LineView) ?? "real";
+  const period = (searchParams.get("period") as ChartPeriodFilter) ?? "months";
+  const year = searchParams.get("year") ?? String(new Date().getFullYear());
+  const yearOptions = availableYears.map((y) => ({
+    value: String(y),
+    label: String(y),
+  }));
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -99,22 +121,55 @@ export function ChartFilters() {
         </div>
       )}
 
-      {/* MÊS DE REFERÊNCIA (centro do eixo X) */}
-      <Select
-        value={monthOffset}
-        onValueChange={(v) => updateParam("offset", v)}
-      >
-        <SelectTrigger className="w-full cursor-pointer sm:w-[180px]">
-          <SelectValue placeholder="Período" />
-        </SelectTrigger>
-        <SelectContent>
-          {MONTH_OPTIONS.map((o) => (
-            <SelectItem key={o.value} value={o.value}>
-              {o.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* PERÍODO: janela de meses (padrão) ou ano inteiro */}
+      <div className="flex items-center gap-1 rounded-lg border p-1">
+        {PERIOD_OPTIONS.map((po) => (
+          <Button
+            key={po.value}
+            variant={period === po.value ? "secondary" : "ghost"}
+            size="sm"
+            className="cursor-pointer"
+            onClick={() => updateParam("period", po.value)}
+          >
+            {po.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* MÊS DE REFERÊNCIA (centro do eixo X) — só no período "Meses" */}
+      {period === "months" && (
+        <Select
+          value={monthOffset}
+          onValueChange={(v) => updateParam("offset", v)}
+        >
+          <SelectTrigger className="w-full cursor-pointer sm:w-[180px]">
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
+          <SelectContent>
+            {MONTH_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
+      {/* ANO DE REFERÊNCIA — só no período "Ano" */}
+      {period === "year" && (
+        <Select value={year} onValueChange={(v) => updateParam("year", v)}>
+          <SelectTrigger className="w-full cursor-pointer sm:w-[140px]">
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            {yearOptions.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }

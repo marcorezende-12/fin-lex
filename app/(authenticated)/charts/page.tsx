@@ -7,9 +7,16 @@ import {
   CardTitle,
 } from "@/app/_components/ui/card";
 
-import { getChartData } from "./_actions/get-chart-data";
+import {
+  getAvailableChartYears,
+  getChartData,
+} from "./_actions/get-chart-data";
 import { ChartBarStacked } from "./_components/chart-bar";
-import { ChartFilters, LineView } from "./_components/chart-filters";
+import {
+  ChartFilters,
+  ChartPeriodFilter,
+  LineView,
+} from "./_components/chart-filters";
 import { ChartLineMultiple } from "./_components/line-chart";
 
 interface ChartsPageProps {
@@ -17,26 +24,40 @@ interface ChartsPageProps {
     chart?: string;
     offset?: string;
     view?: string;
+    period?: string;
+    year?: string;
   }>;
 }
 
 const ChartsPage = async ({ searchParams }: ChartsPageProps) => {
-  const { chart, offset, view } = await searchParams;
+  const { chart, offset, view, period, year } = await searchParams;
 
   const chartType = chart === "bar" ? "bar" : "line";
   const lineView: LineView = view === "expected" ? "expected" : "real";
+  const chartPeriod: ChartPeriodFilter = period === "year" ? "year" : "months";
 
-  // Calcula o mês central a partir do offset (padrão: 0 = mês atual)
-  const monthOffset = parseInt(offset ?? "0", 10);
+  // No período "Ano", a data de referência é só o ano escolhido (dia/mês não
+  // importam — getChartData usa só o ano quando period="year").
   const centerMonth =
-    monthOffset > 0
-      ? addMonths(new Date(), monthOffset)
-      : monthOffset < 0
-        ? subMonths(new Date(), Math.abs(monthOffset))
-        : new Date();
+    chartPeriod === "year"
+      ? new Date(year ? parseInt(year, 10) : new Date().getFullYear(), 0, 1)
+      : (() => {
+          const monthOffset = parseInt(offset ?? "0", 10);
+          return monthOffset > 0
+            ? addMonths(new Date(), monthOffset)
+            : monthOffset < 0
+              ? subMonths(new Date(), Math.abs(monthOffset))
+              : new Date();
+        })();
 
-  const result = await getChartData(centerMonth);
+  const [result, yearsResult] = await Promise.all([
+    getChartData(centerMonth, chartPeriod),
+    getAvailableChartYears(),
+  ]);
   const chartData = result.success ? result.data : [];
+  const availableYears = yearsResult.success
+    ? yearsResult.data
+    : [new Date().getFullYear()];
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,7 +72,7 @@ const ChartsPage = async ({ searchParams }: ChartsPageProps) => {
       </div>
 
       {/* FILTROS */}
-      <ChartFilters />
+      <ChartFilters availableYears={availableYears} />
 
       {/* GRÁFICO PRINCIPAL */}
       {!result.success ? (
@@ -65,13 +86,16 @@ const ChartsPage = async ({ searchParams }: ChartsPageProps) => {
                   ? "Receita Real × Despesa Real"
                   : "Receita Prevista × Despesa Prevista"
                 : "Receitas e Despesas — Barras"}
+              {chartPeriod === "year" && ` — ${centerMonth.getFullYear()}`}
             </CardTitle>
             <p className="text-muted-foreground text-xs">
-              {chartType === "line"
-                ? lineView === "real"
-                  ? "Valores de transações já pagas/recebidas"
-                  : "Valores de transações ainda pendentes"
-                : "Linhas contínuas = realizados · Tracejadas = previstos"}
+              {chartPeriod === "year"
+                ? "Visão anual: janeiro a dezembro"
+                : chartType === "line"
+                  ? lineView === "real"
+                    ? "Valores de transações já pagas/recebidas"
+                    : "Valores de transações ainda pendentes"
+                  : "Linhas contínuas = realizados · Tracejadas = previstos"}
             </p>
           </CardHeader>
           <CardContent className="h-[400px] pb-6">
