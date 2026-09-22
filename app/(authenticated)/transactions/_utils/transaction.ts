@@ -1,5 +1,6 @@
-import { TransactionStatus } from "@prisma/client";
 import { differenceInDays, format } from "date-fns";
+
+import { TransactionStatus } from "@/generated/prisma";
 
 /** Informações calculadas para exibição no tooltip do badge de status. */
 export interface StatusTooltipInfo {

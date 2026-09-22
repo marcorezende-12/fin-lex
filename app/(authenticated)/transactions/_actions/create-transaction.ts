@@ -1,10 +1,10 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PaymentMethod } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/app/_lib/prisma";
+import { PaymentMethod } from "@/generated/prisma";
 
 import {
   TransactionSchema,

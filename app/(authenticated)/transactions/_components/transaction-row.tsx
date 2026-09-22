@@ -1,9 +1,9 @@
-import { TransactionStatus, TransactionType } from "@prisma/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { TableCell, TableRow } from "@/app/_components/ui/table";
 import { formatCurrency } from "@/app/_lib/utils";
+import { TransactionStatus, TransactionType } from "@/generated/prisma";
 
 import { TransactionRow as TransactionRowData } from "../_actions/get-transactions";
 import { PAYMENT_METHOD_LABELS, SelectOption } from "../_types";

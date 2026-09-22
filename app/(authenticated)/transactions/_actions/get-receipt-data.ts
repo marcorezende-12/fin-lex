@@ -1,11 +1,11 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { TransactionStatus } from "@prisma/client";
 
 import { ActionResult } from "@/app/_lib/action-result";
 import { db } from "@/app/_lib/prisma";
 import { ReceiptTemplateContent } from "@/app/_lib/receipt-tokens";
+import { TransactionStatus } from "@/generated/prisma";
 
 export interface ReceiptData {
   transactionName: string;

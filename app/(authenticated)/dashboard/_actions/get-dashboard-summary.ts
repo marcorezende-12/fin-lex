@@ -1,9 +1,9 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { TransactionStatus, TransactionType } from "@prisma/client";
 
 import { db } from "@/app/_lib/prisma";
+import { TransactionStatus, TransactionType } from "@/generated/prisma";
 
 export interface DashboardSummary {
   expectedIncome: number;

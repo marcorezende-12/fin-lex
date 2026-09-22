@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { TransactionStatus, TransactionType } from "@prisma/client";
 import {
   addMonths,
   endOfMonth,
@@ -12,6 +11,7 @@ import {
 import { ptBR } from "date-fns/locale";
 
 import { db } from "@/app/_lib/prisma";
+import { TransactionStatus, TransactionType } from "@/generated/prisma";
 
 export interface ChartDataPoint {
   /** Rótulo do mês para exibição no eixo X, ex: "Jan" */

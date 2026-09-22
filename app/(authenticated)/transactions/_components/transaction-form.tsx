@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PaymentMethod, TransactionType } from "@prisma/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -33,6 +32,7 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { cn, formatCurrency } from "@/app/_lib/utils";
+import { PaymentMethod, TransactionType } from "@/generated/prisma";
 
 import { createTransaction } from "../_actions/create-transaction";
 import {

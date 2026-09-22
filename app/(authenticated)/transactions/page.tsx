@@ -2,7 +2,7 @@ import {
   PaymentMethod,
   TransactionStatus,
   TransactionType,
-} from "@prisma/client";
+} from "@/generated/prisma";
 
 import { getCategories } from "../settings/_actions/category-actions";
 import { getClients } from "../settings/_actions/client-actions";

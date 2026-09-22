@@ -1,13 +1,13 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+
+import { db } from "@/app/_lib/prisma";
 import {
   PaymentMethod,
   TransactionStatus,
   TransactionType,
-} from "@prisma/client";
-
-import { db } from "@/app/_lib/prisma";
+} from "@/generated/prisma";
 
 export interface TransactionFilters {
   search?: string;

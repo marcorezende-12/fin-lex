@@ -2,7 +2,7 @@ import {
   PaymentMethod,
   TransactionStatus,
   TransactionType,
-} from "@prisma/client";
+} from "@/generated/prisma";
 
 /** Par valor/label genérico para selects do formulário. */
 export interface SelectOption {

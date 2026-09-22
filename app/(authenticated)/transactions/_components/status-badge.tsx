@@ -1,5 +1,3 @@
-import { TransactionStatus } from "@prisma/client";
-
 import { Badge } from "@/app/_components/ui/badge";
 import {
   Tooltip,
@@ -7,6 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/app/_components/ui/tooltip";
+import { TransactionStatus } from "@/generated/prisma";
 
 import { getStatusTooltip } from "../_utils/transaction";
 

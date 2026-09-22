@@ -1,10 +1,10 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { TransactionStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/app/_lib/prisma";
+import { TransactionStatus } from "@/generated/prisma";
 
 type ActionResult = { success: true } | { success: false; error: string };
 
