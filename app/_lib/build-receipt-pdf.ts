@@ -1,47 +1,19 @@
 import { jsPDF } from "jspdf";
 
 import {
+  CONTENT_WIDTH,
+  detectRasterFormat,
+  drawParagraph,
+  MARGIN,
+  MAX_Y,
+  PAGE_HEIGHT,
+  PAGE_WIDTH,
+} from "@/app/_lib/pdf-helpers";
+import {
   ReceiptTemplateContent,
   ReceiptTokenMap,
   replaceReceiptTokens,
 } from "@/app/_lib/receipt-tokens";
-
-const PAGE_WIDTH = 210;
-const PAGE_HEIGHT = 297;
-const MARGIN = 25;
-const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
-const MAX_Y = PAGE_HEIGHT - MARGIN;
-
-/** jsPDF só embute imagens rasterizadas (PNG/JPEG/WEBP) — SVG não é suportado. */
-function detectRasterFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" | null {
-  const match = /^data:image\/(png|jpe?g|webp)/i.exec(dataUrl);
-  if (!match) return null;
-  const type = match[1].toLowerCase();
-  if (type === "webp") return "WEBP";
-  return type === "png" ? "PNG" : "JPEG";
-}
-
-/**
- * Desenha um parágrafo já quebrado em linhas, pulando de página quando
- * ultrapassa MAX_Y. Retorna o novo `y` após o parágrafo.
- */
-function drawParagraph(
-  pdf: jsPDF,
-  lines: string[],
-  startY: number,
-  lineHeight: number,
-): number {
-  let y = startY;
-  for (const line of lines) {
-    if (y > MAX_Y) {
-      pdf.addPage();
-      y = MARGIN;
-    }
-    pdf.text(line, MARGIN, y);
-    y += lineHeight;
-  }
-  return y;
-}
 
 /**
  * Gera o PDF do recibo desenhando texto e formas diretamente com jsPDF,

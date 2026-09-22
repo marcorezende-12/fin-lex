@@ -19,7 +19,10 @@ export function BottomNav() {
       aria-label="Navegação principal"
       className="bg-background shrink-0 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="grid grid-cols-4">
+      {/* grid-cols precisa bater com menuItems.length — Tailwind não gera
+          classes dinâmicas (`grid-cols-${n}`), então isso é atualizado à mão
+          sempre que um item for adicionado/removido do menu. */}
+      <ul className="grid grid-cols-5">
         {menuItems.map((item) => {
           // Seções internas (ex: /settings/clients) mantêm a aba pai ativa
           const isActive =
