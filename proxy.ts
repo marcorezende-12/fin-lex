@@ -4,6 +4,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher([
   "/",
   "/api/webhooks(.*)",
+  // Chamada pela rotina de cron da Vercel (sem sessão de usuário) — a
+  // própria rota valida o header Authorization com CRON_SECRET.
+  "/api/cron(.*)",
   "/login(.*)",
   "/signup(.*)",
 ]);

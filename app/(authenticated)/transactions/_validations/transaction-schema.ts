@@ -36,6 +36,13 @@ export const transactionSchema = z
         }),
       )
       .optional(),
+
+    // Campos que só serão usados se for recorrente. `recurringConfigured`
+    // força o usuário a passar pelo dialog de recorrência pelo menos uma
+    // vez (mesmo que só pra confirmar "sem término"), espelhando a
+    // exigência de configurar o número de parcelas no parcelamento.
+    recurringConfigured: z.boolean().optional(),
+    recurringEndDate: z.date().nullable().optional(),
   })
   .superRefine((data, ctx) => {
     // Se o método de pagamento for "Parcelado"...
@@ -46,6 +53,18 @@ export const transactionSchema = z
           code: z.ZodIssueCode.custom,
           message: "Informe um número de parcelas válido (mínimo 2)",
           path: ["installments"],
+        });
+      }
+    }
+
+    // Se o método de pagamento for "Recorrente"...
+    if (data.paymentMethod === PaymentMethod.RECURRING) {
+      // ... é preciso ter passado pelo dialog de configuração
+      if (!data.recurringConfigured) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Configure a recorrência antes de continuar",
+          path: ["recurringConfigured"],
         });
       }
     }

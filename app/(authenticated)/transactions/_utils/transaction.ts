@@ -58,15 +58,20 @@ export function getStatusTooltip(
 }
 
 /**
- * Formata o label de parcelamento para exibição na tabela.
- * Retorna "—" quando a transação não é parcelada.
+ * Formata o label de parcelamento/recorrência para exibição na tabela
+ * (coluna "Parcela"). Retorna "—" quando a transação não é parcelada
+ * nem faz parte de uma recorrência.
  */
 export function formatInstallmentLabel(
   installmentNumber: number | null,
   totalInstallments: number | null,
+  recurringPlanId?: string | null,
 ): string {
   if (installmentNumber && totalInstallments) {
     return `${installmentNumber}/${totalInstallments}`;
+  }
+  if (recurringPlanId) {
+    return "Recorrente";
   }
   return "—";
 }

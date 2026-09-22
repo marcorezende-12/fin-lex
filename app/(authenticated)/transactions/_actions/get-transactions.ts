@@ -36,6 +36,7 @@ export interface TransactionRow {
   categoryName: string | null;
   clientId: string | null;
   clientName: string | null;
+  recurringPlanId: string | null;
 }
 
 type ActionResult =
@@ -148,6 +149,7 @@ export async function getTransactions(
       category: { select: { name: true } },
       clientId: true,
       client: { select: { name: true } },
+      recurringPlanId: true,
     },
     orderBy: { dueDate: "asc" },
   });

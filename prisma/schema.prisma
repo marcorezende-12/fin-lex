@@ -29,6 +29,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   CASH
   INSTALLMENT
+  RECURRING
   OTHER
 }
 
@@ -41,53 +42,54 @@ enum Role {
 // MODELS
 // ==========================================
 model User {
-  id                    String   @id @default(cuid())
-  clerkId               String?  @unique
-  name                  String
-  email                 String   @unique
-  role                  Role     @default(USER)
-  avatarUrl             String?
-  cpfCnpj               String?
+  id        String  @id @default(cuid())
+  clerkId   String? @unique
+  name      String
+  email     String  @unique
+  role      Role    @default(USER)
+  avatarUrl String?
+  cpfCnpj   String?
 
   // Novo campo adicionado
-  onboardingCompleted   Boolean  @default(false)
+  onboardingCompleted Boolean @default(false)
 
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  deletedAt             DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   // Relations
-  clients               Client[]
-  categories            Category[]
-  transactions          Transaction[]
-  installmentPlans      InstallmentPlan[]
-  receiptTemplate       ReceiptTemplate?
+  clients          Client[]
+  categories       Category[]
+  transactions     Transaction[]
+  installmentPlans InstallmentPlan[]
+  recurringPlans   RecurringPlan[]
+  receiptTemplate  ReceiptTemplate?
 
   @@index([clerkId])
   @@index([deletedAt])
 }
 
 model Client {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  email       String?
-  document    String?
-  phone       String?
-  birthDate   DateTime?
-  nickName    String?
-  address     String?
-  city        String?
-  state       String?
-  zipCode     String?
-  country     String?
-  notes       String?
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  email     String?
+  document  String?
+  phone     String?
+  birthDate DateTime?
+  nickName  String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  country   String?
+  notes     String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
   @@index([userId])
@@ -95,16 +97,16 @@ model Client {
 }
 
 model Category {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  color       String?
+  id     String  @id @default(cuid())
+  userId String
+  name   String
+  color  String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
 
   // Inclui deletedAt na chave única para que uma categoria excluída (soft
@@ -115,72 +117,120 @@ model Category {
 }
 
 model InstallmentPlan {
-  id                String   @id @default(cuid())
-  userId            String
-  name              String
-  totalAmount       Int
+  id          String @id @default(cuid())
+  userId      String
+  name        String
+  totalAmount Int
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  deletedAt         DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions      Transaction[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@index([userId])
   @@index([deletedAt])
 }
 
+// Plano de cobrança recorrente mensal (ex: honorário fixo de um cliente).
+// Diferente de InstallmentPlan (N parcelas fixas, geradas de uma vez e
+// que terminam sozinhas), aqui a data de término é opcional — quando
+// null, a recorrência é "sem término" e novas ocorrências continuam
+// sendo geradas indefinidamente por uma rotina mensal (ver
+// app/api/cron/generate-recurring). Por isso as transações não podem
+// todas ser criadas de uma vez: `lastGeneratedDate` marca até onde a
+// geração já avançou, e cada execução gera só o que falta até o
+// horizonte de alguns meses à frente.
+model RecurringPlan {
+  id         String  @id @default(cuid())
+  userId     String
+  clientId   String?
+  categoryId String?
+
+  name          String
+  description   String?         @db.Text
+  amountInCents Int
+  type          TransactionType
+  paymentMethod PaymentMethod   @default(PIX)
+
+  // Dia do mês da cobrança (derivado da data escolhida ao criar), 1-31.
+  // Meses mais curtos são ajustados para o último dia do mês.
+  dayOfMonth        Int
+  startDate         DateTime
+  endDate           DateTime?
+  // false = recorrência encerrada; para de gerar novas ocorrências, mas
+  // preserva as transações já geradas (soft "cancelamento", nunca deleta).
+  active            Boolean   @default(true)
+  // dueDate da última ocorrência já gerada — de onde a próxima geração
+  // continua. Null até a primeira geração acontecer.
+  lastGeneratedDate DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([active])
+  @@index([deletedAt])
+}
+
 model Transaction {
-  id                   String            @id @default(cuid())
-  
-  userId               String
-  clientId             String?
-  categoryId           String?
-  installmentPlanId    String?
+  id String @id @default(cuid())
 
-  name                 String
-  description          String?           @db.Text
-  amountInCents        Int
-  type                 TransactionType
-  status               TransactionStatus @default(PENDING)
-  paymentMethod        PaymentMethod
+  userId            String
+  clientId          String?
+  categoryId        String?
+  installmentPlanId String?
+  recurringPlanId   String?
 
-  installmentNumber    Int?
-  totalInstallments    Int?
+  name          String
+  description   String?           @db.Text
+  amountInCents Int
+  type          TransactionType
+  status        TransactionStatus @default(PENDING)
+  paymentMethod PaymentMethod
 
-  dueDate              DateTime
-  paidAt               DateTime?
+  installmentNumber Int?
+  totalInstallments Int?
 
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  deletedAt            DateTime?
+  dueDate DateTime
+  paidAt  DateTime?
 
-  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client               Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  category             Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  installmentPlan      InstallmentPlan?  @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  installmentPlan InstallmentPlan? @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
+  recurringPlan   RecurringPlan?   @relation(fields: [recurringPlanId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([userId, dueDate])
   @@index([userId, type, status])
   @@index([installmentPlanId])
+  @@index([recurringPlanId])
   @@index([deletedAt])
 }
 
 model ReceiptTemplate {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id     String @id @default(cuid())
+  userId String @unique
 
-  logoDataUrl String?  @db.Text
-  title       String   @default("[Nome do Escritório]")
-  subtitle    String   @default("Escritório de Advocacia")
-  bodyText    String   @db.Text
-  closingText String   @default("Por ser verdade, firmo presente.")
-  footerText  String?  @db.Text
+  logoDataUrl String? @db.Text
+  title       String  @default("[Nome do Escritório]")
+  subtitle    String  @default("Escritório de Advocacia")
+  bodyText    String  @db.Text
+  closingText String  @default("Por ser verdade, firmo presente.")
+  footerText  String? @db.Text
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

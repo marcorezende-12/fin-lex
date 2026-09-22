@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { Button } from "@/app/_components/ui/button";
 import { Calendar } from "@/app/_components/ui/calendar";
 import {
@@ -44,6 +45,7 @@ import { cn, formatCurrency } from "@/app/_lib/utils";
 import { PaymentMethod, TransactionType } from "@/generated/prisma";
 
 import { TransactionRow } from "../_actions/get-transactions";
+import { cancelRecurringPlan } from "../_actions/recurring-plan-actions";
 import { updateTransaction } from "../_actions/update-transaction";
 import {
   PAYMENT_METHOD_OPTIONS,
@@ -141,10 +143,39 @@ export function EditTransactionDialog({
         <DialogHeader>
           <DialogTitle>Editar Movimentação</DialogTitle>
           <DialogDescription>
-            Atualize os dados da movimentação. Parcelamentos devem ser
-            gerenciados individualmente em cada parcela.
+            Atualize os dados da movimentação. Parcelamentos e recorrências são
+            gerenciados individualmente em cada ocorrência.
           </DialogDescription>
         </DialogHeader>
+
+        {/* RECORRÊNCIA — encerrar a série a partir daqui */}
+        {transaction.recurringPlanId && (
+          <div className="border-border bg-muted/50 flex items-center justify-between gap-3 rounded-md border p-3">
+            <p className="text-muted-foreground text-sm">
+              Parte de uma recorrência mensal.
+            </p>
+            <DeleteConfirmDialog
+              trigger={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive cursor-pointer"
+                >
+                  Encerrar recorrência
+                </Button>
+              }
+              title="Encerrar esta recorrência?"
+              description="Nenhuma cobrança futura será gerada a partir de agora. Ocorrências já pagas ou já vencidas continuam no histórico — apenas as pendentes com vencimento futuro serão removidas."
+              successMessage="Recorrência encerrada"
+              confirmLabel="Encerrar"
+              pendingLabel="Encerrando..."
+              onConfirm={() =>
+                cancelRecurringPlan(transaction.recurringPlanId!)
+              }
+            />
+          </div>
+        )}
 
         <Form {...form}>
           <form

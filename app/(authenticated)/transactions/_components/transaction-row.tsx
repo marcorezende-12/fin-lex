@@ -42,6 +42,7 @@ export function TransactionTableRow({
   const installmentLabel = formatInstallmentLabel(
     transaction.installmentNumber,
     transaction.totalInstallments,
+    transaction.recurringPlanId,
   );
 
   return (

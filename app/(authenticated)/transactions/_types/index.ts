@@ -19,6 +19,7 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   BANK_TRANSFER: "Transferência",
   CASH: "Dinheiro",
   INSTALLMENT: "Parcelado",
+  RECURRING: "Recorrente",
   OTHER: "Outro",
 };
 
@@ -45,5 +46,6 @@ export const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] =
     { value: PaymentMethod.BANK_TRANSFER, label: "Transferência" },
     { value: PaymentMethod.CASH, label: "Dinheiro" },
     { value: PaymentMethod.INSTALLMENT, label: "Parcelado" },
+    { value: PaymentMethod.RECURRING, label: "Recorrente" },
     { value: PaymentMethod.OTHER, label: "Outro" },
   ];

@@ -45,6 +45,7 @@ export function TransactionCard({
   const installmentLabel = formatInstallmentLabel(
     transaction.installmentNumber,
     transaction.totalInstallments,
+    transaction.recurringPlanId,
   );
   // O tooltip do StatusBadge não abre com toque, então o mesmo texto vai inline.
   const statusInfo = getStatusTooltip(

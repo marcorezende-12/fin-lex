@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/app/_lib/prisma";
 import { PaymentMethod } from "@/generated/prisma";
 
+import { generatePendingOccurrences } from "../_lib/recurring";
 import {
   TransactionSchema,
   transactionSchema,
@@ -108,6 +109,7 @@ export async function createTransaction(
     date,
     installments,
     installmentsData,
+    recurringEndDate,
   } = parsed.data;
 
   // 3. Busca o usuário interno pelo clerkId
@@ -202,6 +204,27 @@ export async function createTransaction(
           })),
         });
       });
+    } else if (paymentMethod === PaymentMethod.RECURRING) {
+      // 5b'. Cria o plano de recorrência e gera as primeiras ocorrências
+      // dentro do horizonte (ver generatePendingOccurrences) — as demais
+      // vão sendo geradas mês a mês pela rotina em app/api/cron.
+      const plan = await db.recurringPlan.create({
+        data: {
+          userId: user.id,
+          clientId: clientId ?? null,
+          categoryId: categoryId ?? null,
+          name,
+          description: description ?? null,
+          amountInCents,
+          type,
+          paymentMethod,
+          dayOfMonth: date.getDate(),
+          startDate: date,
+          endDate: recurringEndDate ?? null,
+        },
+      });
+
+      await generatePendingOccurrences(plan);
     } else {
       // 5c. Fluxo simples — uma única transação
       await db.transaction.create({

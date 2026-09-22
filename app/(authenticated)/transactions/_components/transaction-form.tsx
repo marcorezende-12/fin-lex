@@ -44,6 +44,7 @@ import {
   transactionSchema,
 } from "../_validations/transaction-schema";
 import { InstallmentsDialog } from "./installments-dialog";
+import { RecurringDialog } from "./recurring-dialog";
 
 interface TransactionFormProps {
   onSuccess: () => void;
@@ -61,6 +62,7 @@ const PAYMENT_METHOD_OPTIONS = [
   { value: PaymentMethod.BANK_TRANSFER, label: "Transferência Bancária" },
   { value: PaymentMethod.CASH, label: "Dinheiro" },
   { value: PaymentMethod.INSTALLMENT, label: "Parcelado" },
+  { value: PaymentMethod.RECURRING, label: "Recorrente" },
   { value: PaymentMethod.OTHER, label: "Outro" },
 ];
 
@@ -72,6 +74,7 @@ export function TransactionForm({
 }: TransactionFormProps) {
   const [isInstallmentsDialogOpen, setIsInstallmentsDialogOpen] =
     useState(false);
+  const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
 
   const form = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema),
@@ -104,6 +107,16 @@ export function TransactionForm({
     control: form.control,
     name: "date",
   }) as Date;
+
+  const recurringConfigured = useWatch({
+    control: form.control,
+    name: "recurringConfigured",
+  }) as boolean | undefined;
+
+  const recurringEndDate = useWatch({
+    control: form.control,
+    name: "recurringEndDate",
+  }) as Date | null | undefined;
 
   const onSubmit = async (data: TransactionInput) => {
     const parsedData = transactionSchema.parse(data);
@@ -378,6 +391,33 @@ export function TransactionForm({
             </div>
           )}
 
+          {/* RECORRÊNCIA (Condicional) */}
+          {paymentMethod === PaymentMethod.RECURRING && (
+            <div className="border-border bg-muted/50 mt-4 space-y-4 rounded-md border p-4">
+              {recurringConfigured ? (
+                <div className="text-center text-sm font-medium text-zinc-300">
+                  Cobrança mensal —{" "}
+                  {recurringEndDate
+                    ? `até ${format(recurringEndDate, "dd/MM/yyyy")}`
+                    : "sem término"}
+                </div>
+              ) : null}
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full cursor-pointer bg-zinc-800 text-white hover:bg-zinc-700"
+                onClick={() => setIsRecurringDialogOpen(true)}
+              >
+                Configurar Recorrência
+              </Button>
+              {form.formState.errors.recurringConfigured && (
+                <p className="text-destructive text-center text-sm">
+                  {form.formState.errors.recurringConfigured.message}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* ERRO GERAL (retornado pela server action) */}
           {form.formState.errors.root && (
             <p className="text-destructive text-sm font-medium">
@@ -420,6 +460,21 @@ export function TransactionForm({
             shouldValidate: true,
           });
           form.setValue("date", newStartDate, { shouldValidate: true });
+        }}
+      />
+
+      <RecurringDialog
+        isOpen={isRecurringDialogOpen}
+        setIsOpen={setIsRecurringDialogOpen}
+        startDate={date || new Date()}
+        defaultEndDate={recurringEndDate}
+        onSave={(endDate) => {
+          form.setValue("recurringEndDate", endDate, {
+            shouldValidate: true,
+          });
+          form.setValue("recurringConfigured", true, {
+            shouldValidate: true,
+          });
         }}
       />
     </>
