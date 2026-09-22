@@ -1,3 +1,8 @@
+import { FileTextIcon } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/app/_components/ui/button";
+
 import { ClientRow } from "../_actions/client-actions";
 import { DeleteClientButton } from "./delete-client-button";
 import { EditClientDialog } from "./edit-client-dialog";
@@ -39,6 +44,19 @@ export function ClientCard({ client }: ClientCardProps) {
       )}
 
       <div className="border-border/50 -mb-1 flex items-center justify-end gap-2 border-t pt-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="text-muted-foreground hover:text-foreground h-8 w-8 cursor-pointer rounded-full"
+        >
+          <Link
+            href={`/settings/clients/${client.id}`}
+            aria-label={`Ver extrato de ${client.name}`}
+          >
+            <FileTextIcon className="h-4 w-4" />
+          </Link>
+        </Button>
         <EditClientDialog client={client} />
         <DeleteClientButton clientId={client.id} clientName={client.name} />
       </div>

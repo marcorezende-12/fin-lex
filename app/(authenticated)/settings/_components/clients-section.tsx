@@ -1,6 +1,7 @@
 "use client";
 
-import { SearchIcon, XIcon } from "lucide-react";
+import { FileTextIcon, SearchIcon, XIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
@@ -135,6 +136,19 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                       </TableCell>
                       <TableCell className="pr-6 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
+                            className="text-muted-foreground hover:text-foreground h-8 w-8 cursor-pointer rounded-full"
+                          >
+                            <Link
+                              href={`/settings/clients/${client.id}`}
+                              aria-label={`Ver extrato de ${client.name}`}
+                            >
+                              <FileTextIcon className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <EditClientDialog client={client} />
                           <DeleteClientButton
                             clientId={client.id}
