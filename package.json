@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
     "postinstall": "prisma generate",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
@@ -36,6 +37,7 @@
     "react-hook-form": "^7.72.1",
     "recharts": "^3.8.0",
     "shadcn": "^3.5.0",
+    "sonner": "^2.0.8",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.6"
   },
