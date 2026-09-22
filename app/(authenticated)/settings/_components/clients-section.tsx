@@ -16,6 +16,7 @@ import {
 
 import { ClientRow } from "../_actions/client-actions";
 import { AddClientDialog } from "./add-client-dialog";
+import { ClientCard } from "./client-card";
 import { DeleteClientButton } from "./delete-client-button";
 import { EditClientDialog } from "./edit-client-dialog";
 
@@ -35,8 +36,8 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* BARRA DE AÇÕES: filtro + botão */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="relative w-full max-w-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Filtrar por nome..."
@@ -83,60 +84,70 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-muted-foreground pl-6 font-medium">
-                    Nome
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-medium">
-                    E-mail
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-medium">
-                    Telefone
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-medium">
-                    CPF/CNPJ
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-center font-medium">
-                    Transações
-                  </TableHead>
-                  <TableHead className="pr-6 text-right" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((client) => (
-                  <TableRow key={client.id} className="border-border/50">
-                    <TableCell className="pl-6 font-medium">
-                      {client.name}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {client.email ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {client.phone ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {client.document ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-center">
-                      {client.transactionCount}
-                    </TableCell>
-                    <TableCell className="pr-6 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <EditClientDialog client={client} />
-                        <DeleteClientButton
-                          clientId={client.id}
-                          clientName={client.name}
-                        />
-                      </div>
-                    </TableCell>
+          <>
+            {/* MOBILE: um card por cliente */}
+            <ul className="divide-border/50 divide-y md:hidden">
+              {filtered.map((client) => (
+                <ClientCard key={client.id} client={client} />
+              ))}
+            </ul>
+
+            {/* DESKTOP: tabela completa */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-muted-foreground pl-6 font-medium">
+                      Nome
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-medium">
+                      E-mail
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-medium">
+                      Telefone
+                    </TableHead>
+                    <TableHead className="text-muted-foreground font-medium">
+                      CPF/CNPJ
+                    </TableHead>
+                    <TableHead className="text-muted-foreground text-center font-medium">
+                      Transações
+                    </TableHead>
+                    <TableHead className="pr-6 text-right" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((client) => (
+                    <TableRow key={client.id} className="border-border/50">
+                      <TableCell className="pl-6 font-medium">
+                        {client.name}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {client.email ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {client.phone ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {client.document ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-center">
+                        {client.transactionCount}
+                      </TableCell>
+                      <TableCell className="pr-6 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <EditClientDialog client={client} />
+                          <DeleteClientButton
+                            clientId={client.id}
+                            clientName={client.name}
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 

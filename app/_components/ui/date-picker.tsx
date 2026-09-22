@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { type DateRange } from "react-day-picker";
 
+import { useIsMobile } from "@/app/_hooks/use-mobile";
+
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Field } from "./field";
@@ -15,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 export function DatePickerWithRange() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
 
   // Lê as datas da URL; se não existirem, usa o mês atual como padrão
   const initialFrom = searchParams.get("from")
@@ -73,7 +76,7 @@ export function DatePickerWithRange() {
             defaultMonth={date?.from}
             selected={date}
             onSelect={handleSelect}
-            numberOfMonths={2}
+            numberOfMonths={isMobile ? 1 : 2}
             locale={ptBR}
           />
         </PopoverContent>

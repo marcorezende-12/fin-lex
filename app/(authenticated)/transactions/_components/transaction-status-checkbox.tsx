@@ -10,6 +10,11 @@ import { ConfirmPaymentDialog } from "./confirm-payment-dialog";
 interface TransactionStatusCheckboxProps {
   transactionId: string;
   isPaid: boolean;
+  /**
+   * Prefixo do id do checkbox. A tabela (desktop) e a lista de cards (mobile)
+   * coexistem no DOM, então cada uma usa um prefixo próprio para evitar ids duplicados.
+   */
+  idPrefix?: string;
 }
 
 /**
@@ -21,6 +26,7 @@ interface TransactionStatusCheckboxProps {
 export function TransactionStatusCheckbox({
   transactionId,
   isPaid,
+  idPrefix = "transaction",
 }: TransactionStatusCheckboxProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -40,7 +46,7 @@ export function TransactionStatusCheckbox({
   return (
     <>
       <Checkbox
-        id={`transaction-${transactionId}`}
+        id={`${idPrefix}-${transactionId}`}
         checked={isPaid}
         onCheckedChange={handleChange}
         disabled={isPending}

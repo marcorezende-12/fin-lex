@@ -2,10 +2,10 @@
 
 import { TrashIcon } from "lucide-react";
 
+import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { Button } from "@/app/_components/ui/button";
 
 import { deleteClient } from "../_actions/client-actions";
-import { DeleteConfirmDialog } from "./delete-confirm-dialog";
 
 interface DeleteClientButtonProps {
   clientId: string;

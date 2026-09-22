@@ -75,9 +75,9 @@ export function TransactionFilters() {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="grid grid-cols-2 gap-3 md:flex md:flex-wrap md:items-center">
       {/* BUSCA TEXTUAL com botão de lupa */}
-      <div className="relative min-w-[200px] flex-1">
+      <div className="relative col-span-2 min-w-[200px] flex-1">
         <Input
           ref={inputRef}
           placeholder="Buscar por nome ou descrição..."
@@ -110,7 +110,7 @@ export function TransactionFilters() {
         value={type || ALL_VALUE}
         onValueChange={(v) => updateParam("type", v)}
       >
-        <SelectTrigger className="w-[140px] cursor-pointer">
+        <SelectTrigger className="w-full cursor-pointer md:w-[140px]">
           <SelectValue placeholder="Tipo" />
         </SelectTrigger>
         <SelectContent>
@@ -128,7 +128,7 @@ export function TransactionFilters() {
         value={status || ALL_VALUE}
         onValueChange={(v) => updateParam("status", v)}
       >
-        <SelectTrigger className="w-[140px] cursor-pointer">
+        <SelectTrigger className="w-full cursor-pointer md:w-[140px]">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
@@ -146,7 +146,7 @@ export function TransactionFilters() {
         value={paymentMethod || ALL_VALUE}
         onValueChange={(v) => updateParam("paymentMethod", v)}
       >
-        <SelectTrigger className="w-[160px] cursor-pointer">
+        <SelectTrigger className="col-span-2 w-full cursor-pointer md:col-span-1 md:w-[160px]">
           <SelectValue placeholder="Pagamento" />
         </SelectTrigger>
         <SelectContent>
@@ -165,7 +165,7 @@ export function TransactionFilters() {
           variant="ghost"
           size="sm"
           onClick={clearFilters}
-          className="text-muted-foreground hover:text-foreground cursor-pointer gap-1"
+          className="text-muted-foreground hover:text-foreground col-span-2 cursor-pointer gap-1"
         >
           <XIcon className="h-4 w-4" />
           Limpar filtros

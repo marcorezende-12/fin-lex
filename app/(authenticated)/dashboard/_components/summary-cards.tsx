@@ -24,9 +24,9 @@ const SummaryCards = ({ summary }: SummaryCardsProps) => {
   } = summary;
 
   return (
-    <div className="grid h-[400px] grid-rows-2 gap-6 overflow-hidden">
+    <div className="grid gap-3 sm:h-[400px] sm:grid-rows-2 sm:gap-6 sm:overflow-hidden">
       {/* Linha 1: Previstos (status PENDING) */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6">
         <SummaryCard
           title="Receita Prevista"
           amount={toCurrency(expectedIncome)}
@@ -51,7 +51,7 @@ const SummaryCards = ({ summary }: SummaryCardsProps) => {
       </div>
 
       {/* Linha 2: Realizados (status PAID) */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6">
         <SummaryCard
           title="Receita Real"
           amount={toCurrency(actualIncome)}

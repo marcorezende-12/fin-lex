@@ -1,14 +1,7 @@
 // components/AppSidebar.tsx
 "use client";
 import { UserButton, useUser } from "@clerk/nextjs";
-import {
-  ChartColumn,
-  DollarSign,
-  Home,
-  Menu,
-  NotebookPen,
-  Settings,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,14 +21,7 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { ThemeToggle } from "../ui/theme-toggle";
-
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Movimentações", url: "/transactions", icon: DollarSign },
-  { title: "Gráficos", url: "/charts", icon: ChartColumn },
-  { title: "Configurações", url: "/settings", icon: Settings },
-  { title: "Assinatura", url: "/subscription", icon: NotebookPen },
-];
+import { menuItems } from "./menu-items";
 
 export function AppSidebar() {
   // Hook do Clerk: pega dados do usuário atual (nome, imagem, etc)

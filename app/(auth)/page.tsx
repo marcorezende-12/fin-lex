@@ -24,7 +24,7 @@ const LoginPage = async () => {
 
   // Se não estiver autenticado, exibe a tela de login
   return (
-    <div className="grid h-full grid-cols-2">
+    <div className="grid h-full grid-cols-1 overflow-y-auto md:grid-cols-2">
       <div className="mx-auto flex h-full max-w-[550px] flex-col justify-center p-8">
         <Image
           src="/dark-logo.svg"
@@ -59,7 +59,7 @@ const LoginPage = async () => {
           </Button>
         </SignInButton>
       </div>
-      <div className="relative h-full w-full">
+      <div className="relative hidden h-full w-full md:block">
         <Image
           src="/login-image.png"
           alt="Faça login"

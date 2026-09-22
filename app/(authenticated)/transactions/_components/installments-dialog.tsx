@@ -252,7 +252,7 @@ export function InstallmentsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-2xl">
+      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-2xl">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-center text-xl font-semibold">
             Configurar Parcela

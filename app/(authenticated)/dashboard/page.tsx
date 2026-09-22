@@ -55,14 +55,14 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Dashboard</h1>
       </div>
-      <div className="flex justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <DatePickerWithRange />
         <AddTransactionButtonWrapper />
       </div>
 
       {/* 2. CARDS DE RESUMO (2/3) + GRÁFICO PREVIEW (1/3) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="h-[400px] lg:col-span-2">
+        <div className="min-w-0 sm:h-[400px] lg:col-span-2">
           {summaryResult.success ? (
             <SummaryCards summary={summaryResult.data} />
           ) : (
@@ -72,7 +72,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
           )}
         </div>
 
-        <div className="h-[400px]">
+        <div className="h-[400px] min-w-0">
           <ChartPreview data={chartData} />
         </div>
       </div>

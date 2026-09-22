@@ -4,7 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { ActionResult } from "@/app/_lib/action-result";
 import { db } from "@/app/_lib/prisma";
+import { resolveUser } from "@/app/_lib/resolve-user";
 
 // ==========================================
 // SCHEMAS
@@ -30,22 +32,6 @@ export interface CategoryRow {
   name: string;
   color: string | null;
   transactionCount: number;
-}
-
-type ActionResult<T = void> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-
-// ==========================================
-// HELPERS
-// ==========================================
-
-async function resolveUser(clerkId: string | null) {
-  if (!clerkId) return null;
-  return db.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
 }
 
 // ==========================================
@@ -112,9 +98,14 @@ export async function createCategory(
     return { success: false, error: "Já existe uma categoria com esse nome" };
   }
 
-  await db.category.create({
-    data: { userId: user.id, name, color: color ?? null },
-  });
+  try {
+    await db.category.create({
+      data: { userId: user.id, name, color: color ?? null },
+    });
+  } catch (err) {
+    console.error("[createCategory] Erro ao salvar categoria:", err);
+    return { success: false, error: "Erro interno ao salvar a categoria" };
+  }
 
   revalidatePath("/settings");
 
@@ -161,10 +152,15 @@ export async function updateCategory(
     return { success: false, error: "Já existe uma categoria com esse nome" };
   }
 
-  await db.category.update({
-    where: { id: category.id },
-    data: { name, color: color ?? null },
-  });
+  try {
+    await db.category.update({
+      where: { id: category.id },
+      data: { name, color: color ?? null },
+    });
+  } catch (err) {
+    console.error("[updateCategory] Erro ao salvar categoria:", err);
+    return { success: false, error: "Erro interno ao salvar a categoria" };
+  }
 
   revalidatePath("/settings");
 

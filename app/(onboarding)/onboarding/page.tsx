@@ -11,8 +11,8 @@ const OnboardingPage = async () => {
   const primaryEmail = clerkUser?.emailAddresses[0]?.emailAddress || "";
 
   return (
-    <div className="bg-background flex h-screen items-center justify-center p-4">
-      <div className="border-border bg-card text-card-foreground w-full max-w-md rounded-xl border p-8 shadow-sm">
+    <div className="bg-background flex h-full overflow-y-auto p-4">
+      <div className="border-border bg-card text-card-foreground m-auto w-full max-w-md rounded-xl border p-6 shadow-sm sm:p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">
             Bem-vindo ao FinLex

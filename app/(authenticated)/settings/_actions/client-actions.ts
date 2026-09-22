@@ -4,45 +4,14 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { ActionResult } from "@/app/_lib/action-result";
+import {
+  isValidCnpj,
+  isValidCpf,
+  onlyDigits,
+} from "@/app/_lib/document-validation";
 import { db } from "@/app/_lib/prisma";
-
-// ==========================================
-// HELPERS DE VALIDAÇÃO
-// ==========================================
-
-/** Remove todos os caracteres não numéricos */
-function onlyDigits(value: string): string {
-  return value.replace(/\D/g, "");
-}
-
-function isValidCpf(digits: string): boolean {
-  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) sum += Number(digits[i]) * (10 - i);
-  let remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  if (remainder !== Number(digits[9])) return false;
-  sum = 0;
-  for (let i = 0; i < 10; i++) sum += Number(digits[i]) * (11 - i);
-  remainder = (sum * 10) % 11;
-  if (remainder === 10 || remainder === 11) remainder = 0;
-  return remainder === Number(digits[10]);
-}
-
-function isValidCnpj(digits: string): boolean {
-  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false;
-  const calc = (d: string, weights: number[]) => {
-    const sum = weights.reduce((acc, w, i) => acc + Number(d[i]) * w, 0);
-    const r = sum % 11;
-    return r < 2 ? 0 : 11 - r;
-  };
-  const w1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-  const w2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-  return (
-    calc(digits, w1) === Number(digits[12]) &&
-    calc(digits, w2) === Number(digits[13])
-  );
-}
+import { resolveUser } from "@/app/_lib/resolve-user";
 
 // ==========================================
 // SCHEMAS
@@ -98,21 +67,9 @@ export interface ClientRow {
 
 export type ClientInput = z.input<typeof clientSchema>;
 
-type ActionResult<T = void> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-
 // ==========================================
 // HELPERS
 // ==========================================
-
-async function resolveUser(clerkId: string | null) {
-  if (!clerkId) return null;
-  return db.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-}
 
 function nullIfEmpty(value: string | undefined | null): string | null {
   if (!value || value.trim() === "") return null;

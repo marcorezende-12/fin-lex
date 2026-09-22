@@ -33,13 +33,13 @@ export function ChartPreview({ data }: ChartPreviewProps) {
 
   return (
     <Card className="border-border bg-card flex h-[400px] flex-col overflow-hidden rounded-2xl border shadow-sm">
-      <CardHeader className="flex shrink-0 flex-row items-center justify-between gap-2 pb-2">
-        <CardTitle className="text-base font-semibold">
+      <CardHeader className="flex shrink-0 flex-row flex-wrap items-center justify-between gap-2 pb-2">
+        <CardTitle className="min-w-0 flex-1 truncate text-base font-semibold max-sm:basis-full max-sm:whitespace-normal">
           {view === "real"
             ? "Receita Real × Despesa Real"
             : "Receita Prevista × Despesa Prevista"}
         </CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {/* TOGGLE */}
           <div className="flex items-center gap-0.5 rounded-lg border p-0.5">
             {VIEWS.map((v) => (

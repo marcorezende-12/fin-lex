@@ -49,7 +49,7 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
   return (
     <div className="flex flex-col gap-6">
       {/* CABEÇALHO */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">Movimentações</h1>
           <p className="text-muted-foreground text-sm">

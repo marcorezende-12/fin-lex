@@ -31,7 +31,7 @@ export function AddClientDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-lg">
+      <DialogContent className="flex max-h-[90dvh] flex-col sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Novo Cliente</DialogTitle>
           <DialogDescription>

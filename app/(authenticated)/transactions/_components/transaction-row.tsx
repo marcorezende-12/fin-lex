@@ -9,6 +9,7 @@ import { TransactionRow as TransactionRowData } from "../_actions/get-transactio
 import { PAYMENT_METHOD_LABELS, SelectOption } from "../_types";
 import { formatInstallmentLabel } from "../_utils/transaction";
 import { DeleteTransactionButton } from "./delete-transaction-button";
+import { DownloadReceiptButton } from "./download-receipt-button";
 import { EditTransactionDialog } from "./edit-transaction-dialog";
 import { StatusBadge } from "./status-badge";
 import { TransactionStatusCheckbox } from "./transaction-status-checkbox";
@@ -101,6 +102,12 @@ export function TransactionTableRow({
       {/* AÇÕES */}
       <TableCell className="py-4 pr-6 text-right">
         <div className="flex items-center justify-end gap-1">
+          {isPaid && (
+            <DownloadReceiptButton
+              transactionId={transaction.id}
+              transactionName={transaction.name}
+            />
+          )}
           <EditTransactionDialog
             transaction={transaction}
             categories={categories}

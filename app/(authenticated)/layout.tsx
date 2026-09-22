@@ -1,10 +1,9 @@
-// app/(dashboard)/layout.tsx
+// app/(authenticated)/layout.tsx
 
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { AppSidebar } from "../_components/layout/AppSidebar";
-import { SidebarProvider } from "../_components/ui/sidebar";
+import { AppShell } from "../_components/layout/AppShell";
 import { db } from "../_lib/prisma";
 
 export default async function AuthenticatedLayout({
@@ -14,18 +13,17 @@ export default async function AuthenticatedLayout({
 }) {
   const { userId } = await auth();
 
-  // Sincroniza o usuário com o banco (cria se não existir)
-  // const syncedUser = await syncUser(userId);
-
-  // if (!syncedUser) {
-  //   console.error("Falha ao sincronizar usuário:", userId);
-  //   // Opcional: redirect("/error") ou tratar de outra forma
-  // }
+  if (!userId) {
+    redirect("/");
+  }
 
   // Verifica se o usuário já completou o onboarding/setup
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { onboardingCompleted: true },
+    select: {
+      id: true,
+      onboardingCompleted: true,
+    },
   });
 
   // Se ainda não completou o onboarding → redireciona
@@ -33,20 +31,5 @@ export default async function AuthenticatedLayout({
     redirect("/onboarding");
   }
 
-  return (
-    <SidebarProvider>
-      {/* Sidebar fixa à esquerda */}
-      <AppSidebar />
-
-      {/* Área principal do conteúdo */}
-      <div className="flex w-full flex-1 flex-col overflow-hidden">
-        {/* Header superior */}
-
-        {/* Conteúdo das páginas (Dashboard, Movimentações, etc) */}
-        <main className="flex flex-1 flex-col overflow-auto p-6">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
-  );
+  return <AppShell>{children}</AppShell>;
 }

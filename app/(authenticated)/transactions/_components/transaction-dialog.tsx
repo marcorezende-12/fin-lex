@@ -36,7 +36,7 @@ export function AddTransactionButton({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-[500px]">
+      <DialogContent className="flex max-h-[90dvh] flex-col sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Adicionar Transação</DialogTitle>
           <DialogDescription>

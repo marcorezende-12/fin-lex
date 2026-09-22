@@ -104,7 +104,7 @@ export function ChartFilters() {
         value={monthOffset}
         onValueChange={(v) => updateParam("offset", v)}
       >
-        <SelectTrigger className="w-[180px] cursor-pointer">
+        <SelectTrigger className="w-full cursor-pointer sm:w-[180px]">
           <SelectValue placeholder="Período" />
         </SelectTrigger>
         <SelectContent>

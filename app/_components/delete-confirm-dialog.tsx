@@ -23,6 +23,10 @@ interface DeleteConfirmDialogProps {
   description: string;
   /** Função assíncrona executada ao confirmar */
   onConfirm: () => Promise<void>;
+  /** Texto do botão de confirmação (padrão: "Excluir") */
+  confirmLabel?: string;
+  /** Texto do botão de confirmação enquanto processa (padrão: "Excluindo...") */
+  pendingLabel?: string;
 }
 
 export function DeleteConfirmDialog({
@@ -30,6 +34,8 @@ export function DeleteConfirmDialog({
   title,
   description,
   onConfirm,
+  confirmLabel = "Excluir",
+  pendingLabel = "Excluindo...",
 }: DeleteConfirmDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -63,7 +69,7 @@ export function DeleteConfirmDialog({
             disabled={isPending}
             className="cursor-pointer"
           >
-            Cancelar
+            Voltar
           </Button>
           <Button
             variant="destructive"
@@ -71,7 +77,7 @@ export function DeleteConfirmDialog({
             disabled={isPending}
             className="cursor-pointer"
           >
-            {isPending ? "Excluindo..." : "Excluir"}
+            {isPending ? pendingLabel : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
