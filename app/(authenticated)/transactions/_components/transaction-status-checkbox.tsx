@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Checkbox } from "@/app/_components/ui/checkbox";
 
@@ -35,7 +36,10 @@ export function TransactionStatusCheckbox({
     if (isPaid) {
       // Reverter para pendente — sem necessidade de data, executa direto
       startTransition(async () => {
-        await toggleTransactionStatus(transactionId);
+        const result = await toggleTransactionStatus(transactionId);
+        if (!result.success) {
+          toast.error(result.error);
+        }
       });
     } else {
       // Marcar como pago — abre o dialog para confirmar a data

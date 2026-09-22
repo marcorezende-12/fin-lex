@@ -2,6 +2,7 @@
 
 import { DownloadIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import { buildReceiptPdf } from "@/app/_lib/build-receipt-pdf";
@@ -26,15 +27,13 @@ export function DownloadReceiptButton({
   transactionName,
 }: DownloadReceiptButtonProps) {
   const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleClick = async () => {
-    setError(null);
     setIsPending(true);
 
     const result = await getReceiptData(transactionId);
     if (!result.success) {
-      setError(result.error);
+      toast.error(result.error);
       setIsPending(false);
       return;
     }
@@ -50,7 +49,7 @@ export function DownloadReceiptButton({
         : "recibo";
       pdf.save(`recibo-${clientPart}-${datePart}.pdf`);
     } catch {
-      setError("Não foi possível gerar o recibo");
+      toast.error("Não foi possível gerar o recibo");
     } finally {
       setIsPending(false);
     }
@@ -63,7 +62,6 @@ export function DownloadReceiptButton({
       size="icon"
       className="text-muted-foreground hover:text-foreground h-8 w-8 cursor-pointer rounded-full"
       aria-label={`Baixar recibo de ${transactionName}`}
-      title={error ?? undefined}
       onClick={handleClick}
       disabled={isPending}
     >

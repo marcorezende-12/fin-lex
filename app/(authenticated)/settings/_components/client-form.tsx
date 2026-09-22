@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/app/_components/ui/button";
@@ -109,6 +110,7 @@ export function ClientForm({ onSuccess }: ClientFormProps) {
         form.setError("root", { message: result.error });
         return;
       }
+      toast.success("Cliente adicionado");
       form.reset();
       onSuccess?.();
     });

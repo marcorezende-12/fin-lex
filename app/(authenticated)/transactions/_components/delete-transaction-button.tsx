@@ -2,6 +2,7 @@
 
 import { AlertTriangleIcon, Trash2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import {
@@ -30,7 +31,12 @@ export function DeleteTransactionButton({
 
   const handleConfirm = () => {
     startTransition(async () => {
-      await deleteTransaction(transactionId);
+      const result = await deleteTransaction(transactionId);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Movimentação excluída");
       setOpen(false);
     });
   };

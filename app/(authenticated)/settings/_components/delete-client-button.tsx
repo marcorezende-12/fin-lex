@@ -30,9 +30,8 @@ export function DeleteClientButton({
       }
       title={`Excluir "${clientName}"?`}
       description="Esta ação não pode ser desfeita. As transações vinculadas a este cliente não serão excluídas, mas perderão a referência ao cliente."
-      onConfirm={async () => {
-        await deleteClient(clientId);
-      }}
+      successMessage="Cliente excluído"
+      onConfirm={() => deleteClient(clientId)}
     />
   );
 }

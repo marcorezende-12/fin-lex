@@ -2,6 +2,7 @@
 
 import { AlertTriangleIcon } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import {
@@ -21,8 +22,14 @@ interface DeleteConfirmDialogProps {
   title: string;
   /** Descrição/aviso exibido no dialog */
   description: string;
-  /** Função assíncrona executada ao confirmar */
-  onConfirm: () => Promise<void>;
+  /**
+   * Função assíncrona executada ao confirmar. Deve retornar o resultado da
+   * server action para que o dialog saiba se deve fechar (sucesso) ou
+   * permanecer aberto exibindo o erro (falha) via toast.
+   */
+  onConfirm: () => Promise<{ success: boolean; error?: string }>;
+  /** Mensagem exibida em toast de sucesso */
+  successMessage?: string;
   /** Texto do botão de confirmação (padrão: "Excluir") */
   confirmLabel?: string;
   /** Texto do botão de confirmação enquanto processa (padrão: "Excluindo...") */
@@ -34,6 +41,7 @@ export function DeleteConfirmDialog({
   title,
   description,
   onConfirm,
+  successMessage = "Excluído com sucesso",
   confirmLabel = "Excluir",
   pendingLabel = "Excluindo...",
 }: DeleteConfirmDialogProps) {
@@ -42,7 +50,12 @@ export function DeleteConfirmDialog({
 
   const handleConfirm = () => {
     startTransition(async () => {
-      await onConfirm();
+      const result = await onConfirm();
+      if (!result.success) {
+        toast.error(result.error ?? "Não foi possível excluir");
+        return;
+      }
+      toast.success(successMessage);
       setOpen(false);
     });
   };

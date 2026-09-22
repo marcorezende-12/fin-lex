@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import { Calendar } from "@/app/_components/ui/calendar";
@@ -113,6 +114,7 @@ export function TransactionForm({
       return;
     }
 
+    toast.success("Movimentação adicionada");
     onSuccess();
   };
 

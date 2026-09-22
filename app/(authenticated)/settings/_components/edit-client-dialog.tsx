@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PencilIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/app/_components/ui/button";
@@ -156,6 +157,7 @@ export function EditClientDialog({ client }: EditClientDialogProps) {
         form.setError("root", { message: result.error });
         return;
       }
+      toast.success("Cliente atualizado");
       setOpen(false);
     });
   };

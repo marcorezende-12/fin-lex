@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import type { Metadata, Viewport } from "next";
 import { Mulish } from "next/font/google";
+import { Toaster } from "sonner";
 
 import { RegisterServiceWorker } from "./_components/providers/register-service-worker";
 import { ThemeProvider } from "./_components/providers/theme-provider";
@@ -54,6 +55,7 @@ export default function RootLayout({
             <div className="flex h-full flex-col overflow-hidden">
               {children}
             </div>
+            <Toaster richColors position="top-center" closeButton />
             <RegisterServiceWorker />
           </ThemeProvider>
         </body>

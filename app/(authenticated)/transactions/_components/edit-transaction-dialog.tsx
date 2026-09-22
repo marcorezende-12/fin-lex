@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, PencilIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/app/_components/ui/button";
@@ -102,6 +103,7 @@ export function EditTransactionDialog({
         form.setError("root", { message: result.error });
         return;
       }
+      toast.success("Movimentação atualizada");
       setOpen(false);
     });
   };

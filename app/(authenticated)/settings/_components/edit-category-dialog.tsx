@@ -2,6 +2,7 @@
 
 import { PencilIcon } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import {
@@ -55,6 +56,7 @@ export function EditCategoryDialog({ category }: EditCategoryDialogProps) {
         setError(result.error);
         return;
       }
+      toast.success("Categoria atualizada");
       setOpen(false);
     });
   };

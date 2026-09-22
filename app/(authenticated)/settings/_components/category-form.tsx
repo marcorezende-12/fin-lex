@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
@@ -43,6 +44,7 @@ export function CategoryForm({ onSuccess }: CategoryFormProps) {
         setError(result.error);
         return;
       }
+      toast.success("Categoria adicionada");
       formRef.current?.reset();
       onSuccess?.();
     });

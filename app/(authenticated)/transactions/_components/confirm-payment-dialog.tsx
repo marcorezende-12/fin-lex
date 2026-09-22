@@ -2,6 +2,7 @@
 
 import { CalendarIcon } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
 import { Calendar } from "@/app/_components/ui/calendar";
@@ -41,7 +42,12 @@ export function ConfirmPaymentDialog({
 
   const handleConfirm = () => {
     startTransition(async () => {
-      await toggleTransactionStatus(transactionId, paidAt);
+      const result = await toggleTransactionStatus(transactionId, paidAt);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Movimentação marcada como paga");
       onOpenChange(false);
     });
   };

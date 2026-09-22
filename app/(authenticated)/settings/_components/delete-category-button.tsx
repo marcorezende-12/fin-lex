@@ -33,9 +33,8 @@ export function DeleteCategoryButton({
       }
       title={`Excluir "${categoryName}"?`}
       description="Esta ação não pode ser desfeita. As transações vinculadas a esta categoria não serão excluídas, mas perderão a classificação."
-      onConfirm={async () => {
-        await deleteCategory(categoryId);
-      }}
+      successMessage="Categoria excluída"
+      onConfirm={() => deleteCategory(categoryId)}
     />
   );
 }
