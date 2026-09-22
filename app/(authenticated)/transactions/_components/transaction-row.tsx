@@ -18,6 +18,8 @@ interface TransactionRowProps {
   transaction: TransactionRowData;
   categories: SelectOption[];
   clients: SelectOption[];
+  /** Destaque visual quando a movimentação está incluída na seleção em massa. */
+  selected?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export function TransactionTableRow({
   transaction,
   categories,
   clients,
+  selected = false,
 }: TransactionRowProps) {
   const isPaid = transaction.status === TransactionStatus.PAID;
   const isExpense = transaction.type === TransactionType.EXPENSE;
@@ -42,7 +45,11 @@ export function TransactionTableRow({
   );
 
   return (
-    <TableRow className="border-border/50 hover:bg-muted/50 transition-colors">
+    <TableRow
+      className={`border-border/50 hover:bg-muted/50 transition-colors ${
+        selected ? "bg-primary/5" : ""
+      }`}
+    >
       {/* CHECKBOX */}
       <TableCell className="pl-6">
         <TransactionStatusCheckbox

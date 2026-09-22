@@ -75,6 +75,7 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
         transactions={transactions}
         categories={categories}
         clients={clients}
+        showBulkActions
       />
     </div>
   );

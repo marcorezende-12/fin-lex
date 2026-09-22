@@ -20,6 +20,8 @@ interface TransactionCardProps {
   transaction: TransactionRowData;
   categories: SelectOption[];
   clients: SelectOption[];
+  /** Destaque visual quando a movimentação está incluída na seleção em massa. */
+  selected?: boolean;
 }
 
 /**
@@ -33,6 +35,7 @@ export function TransactionCard({
   transaction,
   categories,
   clients,
+  selected = false,
 }: TransactionCardProps) {
   const isPaid = transaction.status === TransactionStatus.PAID;
   const isExpense = transaction.type === TransactionType.EXPENSE;
@@ -51,7 +54,7 @@ export function TransactionCard({
   );
 
   return (
-    <li className="flex flex-col gap-3 p-4">
+    <li className={`flex flex-col gap-3 p-4 ${selected ? "bg-primary/5" : ""}`}>
       <div className="flex items-start gap-3">
         <div className="pt-1">
           <TransactionStatusCheckbox
