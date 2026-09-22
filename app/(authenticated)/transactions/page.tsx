@@ -1,3 +1,4 @@
+import { PaginationControls } from "@/app/_components/ui/pagination-controls";
 import {
   PaymentMethod,
   TransactionStatus,
@@ -8,8 +9,11 @@ import { getCategories } from "../settings/_actions/category-actions";
 import { getClients } from "../settings/_actions/client-actions";
 import { getTransactions } from "./_actions/get-transactions";
 import { AddTransactionButtonWrapper } from "./_components/add-transaction-button-wrapper";
+import { ExportCsvButton } from "./_components/export-csv-button";
 import { TransactionFilters } from "./_components/transaction-filters";
 import { TransactionsTable } from "./_components/transactions-table";
+
+const PAGE_SIZE = 50;
 
 interface TransactionsPageProps {
   searchParams: Promise<{
@@ -19,26 +23,33 @@ interface TransactionsPageProps {
     paymentMethod?: string;
     from?: string;
     to?: string;
+    page?: string;
   }>;
 }
 
 const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
-  const { search, type, status, paymentMethod, from, to } = await searchParams;
+  const { search, type, status, paymentMethod, from, to, page } =
+    await searchParams;
+
+  const filters = {
+    search,
+    type: type as TransactionType | undefined,
+    status: status as TransactionStatus | undefined,
+    paymentMethod: paymentMethod as PaymentMethod | undefined,
+    from: from ? new Date(from) : undefined,
+    to: to ? new Date(to) : undefined,
+  };
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
 
   const [result, categoriesResult, clientsResult] = await Promise.all([
-    getTransactions({
-      search,
-      type: type as TransactionType | undefined,
-      status: status as TransactionStatus | undefined,
-      paymentMethod: paymentMethod as PaymentMethod | undefined,
-      from: from ? new Date(from) : undefined,
-      to: to ? new Date(to) : undefined,
-    }),
+    getTransactions(filters, { page: currentPage, pageSize: PAGE_SIZE }),
     getCategories(),
     getClients(),
   ]);
 
   const transactions = result.success ? result.data : [];
+  const totalCount = result.success ? result.totalCount : 0;
+  const totalPages = result.success ? result.totalPages : 1;
   const categories = categoriesResult.success
     ? categoriesResult.data.map((c) => ({ value: c.id, label: c.name }))
     : [];
@@ -53,13 +64,16 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
         <div>
           <h1 className="text-xl font-bold">Movimentações</h1>
           <p className="text-muted-foreground text-sm">
-            {transactions.length}{" "}
-            {transactions.length === 1
+            {totalCount}{" "}
+            {totalCount === 1
               ? "movimentação encontrada"
               : "movimentações encontradas"}
           </p>
         </div>
-        <AddTransactionButtonWrapper />
+        <div className="flex items-center gap-2">
+          <ExportCsvButton filters={filters} />
+          <AddTransactionButtonWrapper />
+        </div>
       </div>
 
       {/* FILTROS */}
@@ -77,6 +91,9 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
         clients={clients}
         showBulkActions
       />
+
+      {/* PAGINAÇÃO */}
+      <PaginationControls page={currentPage} totalPages={totalPages} />
     </div>
   );
 };

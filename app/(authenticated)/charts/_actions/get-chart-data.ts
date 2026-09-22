@@ -169,14 +169,18 @@ export async function getAvailableChartYears(): Promise<YearsResult> {
   });
   if (!user) return { success: false, error: "Usuário não encontrado" };
 
-  const transactions = await db.transaction.findMany({
-    where: { userId: user.id, deletedAt: null },
-    select: { dueDate: true },
-  });
+  // DISTINCT direto no banco em vez de trazer toda transação só pra
+  // extrair o ano em JS — não escala (busca tudo pra descartar quase tudo).
+  const rows = await db.$queryRaw<{ year: number }[]>`
+    SELECT DISTINCT EXTRACT(YEAR FROM "dueDate")::int AS year
+    FROM "Transaction"
+    WHERE "userId" = ${user.id} AND "deletedAt" IS NULL
+    ORDER BY year DESC
+  `;
 
   const years = new Set<number>([new Date().getFullYear()]);
-  for (const t of transactions) {
-    years.add(new Date(t.dueDate).getFullYear());
+  for (const row of rows) {
+    years.add(row.year);
   }
 
   return {

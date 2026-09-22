@@ -210,9 +210,15 @@ model Transaction {
   installmentPlan InstallmentPlan? @relation(fields: [installmentPlanId], references: [id], onDelete: SetNull)
   recurringPlan   RecurringPlan?   @relation(fields: [recurringPlanId], references: [id], onDelete: SetNull)
 
-  @@index([userId])
-  @@index([userId, dueDate])
-  @@index([userId, type, status])
+  // Praticamente toda query do app filtra por userId + deletedAt: null, então
+  // os índices compostos já incluem deletedAt em vez de deixá-lo separado —
+  // cobre o filtro inteiro numa busca só, em vez de precisar combinar dois
+  // índices (bitmap scan). [userId] sozinho passa a ser redundante (todo
+  // índice abaixo já serve como prefixo para uma busca só por userId).
+  @@index([userId, deletedAt, dueDate])
+  @@index([userId, deletedAt, type, status])
+  // Extrato por cliente: WHERE clientId = ? AND deletedAt IS NULL
+  @@index([clientId, deletedAt])
   @@index([installmentPlanId])
   @@index([recurringPlanId])
   @@index([deletedAt])
