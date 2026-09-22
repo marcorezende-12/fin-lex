@@ -82,7 +82,7 @@ export function TransactionForm({
       name: "",
       description: "",
       amount: 0,
-      type: TransactionType.EXPENSE,
+      type: TransactionType.INCOME,
       paymentMethod: PaymentMethod.PIX,
       date: new Date(),
     },

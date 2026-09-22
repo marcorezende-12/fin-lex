@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { DeleteConfirmDialog } from "@/app/_components/delete-confirm-dialog";
 import { Button } from "@/app/_components/ui/button";
 import { Calendar } from "@/app/_components/ui/calendar";
 import {
@@ -81,6 +80,8 @@ export function EditTransactionDialog({
 }: EditTransactionDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isCancellingRecurring, setIsCancellingRecurring] = useState(false);
+  const [isCancelPending, startCancelTransition] = useTransition();
 
   const buildDefaultValues = (): EditTransactionValues => ({
     name: transaction.name,
@@ -122,8 +123,22 @@ export function EditTransactionDialog({
         categoryId: transaction.categoryId ?? undefined,
         clientId: transaction.clientId ?? undefined,
       });
+      setIsCancellingRecurring(false);
     }
     setOpen(next);
+  };
+
+  const handleCancelRecurring = () => {
+    startCancelTransition(async () => {
+      const result = await cancelRecurringPlan(transaction.recurringPlanId!);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Recorrência encerrada");
+      setIsCancellingRecurring(false);
+      setOpen(false);
+    });
   };
 
   return (
@@ -148,32 +163,59 @@ export function EditTransactionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* RECORRÊNCIA — encerrar a série a partir daqui */}
+        {/* RECORRÊNCIA — encerrar a série a partir daqui. Confirmação
+            inline (não um Dialog aninhado): abrir um segundo Dialog
+            dentro deste trava a página inteira depois de fechar o
+            interno (bug conhecido de Dialogs do Radix aninhados). */}
         {transaction.recurringPlanId && (
-          <div className="border-border bg-muted/50 flex items-center justify-between gap-3 rounded-md border p-3">
-            <p className="text-muted-foreground text-sm">
-              Parte de uma recorrência mensal.
-            </p>
-            <DeleteConfirmDialog
-              trigger={
+          <div className="border-border bg-muted/50 space-y-2 rounded-md border p-3">
+            {isCancellingRecurring ? (
+              <>
+                <p className="text-sm">
+                  Encerrar esta recorrência? Nenhuma cobrança futura será gerada
+                  a partir de agora. Ocorrências já pagas ou já vencidas
+                  continuam no histórico — apenas as pendentes com vencimento
+                  futuro serão removidas.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCancellingRecurring(false)}
+                    disabled={isCancelPending}
+                    className="cursor-pointer"
+                  >
+                    Voltar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleCancelRecurring}
+                    disabled={isCancelPending}
+                    className="cursor-pointer"
+                  >
+                    {isCancelPending ? "Encerrando..." : "Confirmar"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-muted-foreground text-sm">
+                  Parte de uma recorrência mensal.
+                </p>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   className="text-destructive hover:text-destructive cursor-pointer"
+                  onClick={() => setIsCancellingRecurring(true)}
                 >
                   Encerrar recorrência
                 </Button>
-              }
-              title="Encerrar esta recorrência?"
-              description="Nenhuma cobrança futura será gerada a partir de agora. Ocorrências já pagas ou já vencidas continuam no histórico — apenas as pendentes com vencimento futuro serão removidas."
-              successMessage="Recorrência encerrada"
-              confirmLabel="Encerrar"
-              pendingLabel="Encerrando..."
-              onConfirm={() =>
-                cancelRecurringPlan(transaction.recurringPlanId!)
-              }
-            />
+              </div>
+            )}
           </div>
         )}
 
