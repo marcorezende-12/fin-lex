@@ -4,11 +4,17 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/app/_lib/prisma";
+import { PaymentMethod } from "@/generated/prisma";
 
 import {
   TransactionSchema,
-  transactionSchema,
+  updateTransactionSchema,
 } from "../_validations/transaction-schema";
+
+const SPECIAL_PAYMENT_METHODS: PaymentMethod[] = [
+  PaymentMethod.INSTALLMENT,
+  PaymentMethod.RECURRING,
+];
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -31,7 +37,7 @@ export async function updateTransaction(
   if (!user) return { success: false, error: "Usuário não encontrado" };
 
   // Validação server-side (não confia nos dados vindos do cliente)
-  const parsed = transactionSchema.safeParse(data);
+  const parsed = updateTransactionSchema.safeParse(data);
   if (!parsed.success) {
     return {
       success: false,
@@ -52,10 +58,25 @@ export async function updateTransaction(
 
   const transaction = await db.transaction.findFirst({
     where: { id: transactionId, userId: user.id, deletedAt: null },
-    select: { id: true },
+    select: { id: true, paymentMethod: true },
   });
   if (!transaction)
     return { success: false, error: "Transação não encontrada" };
+
+  // Parcelamento e recorrência têm fluxo próprio (parcelas geradas de uma
+  // vez / plano de recorrência) — a edição não sabe configurar nenhum dos
+  // dois, então só permite manter o método já existente, nunca migrar
+  // para um desses a partir daqui.
+  if (
+    paymentMethod !== transaction.paymentMethod &&
+    SPECIAL_PAYMENT_METHODS.includes(paymentMethod)
+  ) {
+    return {
+      success: false,
+      error:
+        "Não é possível mudar para parcelado ou recorrente editando uma movimentação existente — crie uma nova.",
+    };
+  }
 
   // Valida FK de categoria (se fornecida)
   if (categoryId) {
