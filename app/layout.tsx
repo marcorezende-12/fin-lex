@@ -42,8 +42,9 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full" suppressHydrationWarning>
       <ClerkProvider
         appearance={{
-          baseTheme: dark,
+          theme: dark,
         }}
+        afterSignOutUrl="/"
       >
         <body className={`${mulish.className} h-full antialiased`}>
           <ThemeProvider
