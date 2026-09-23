@@ -6,14 +6,18 @@ import {
   CONTENT_WIDTH,
   drawLetterhead,
   drawParagraph,
+  drawSignedBarChart,
   Letterhead,
   MARGIN,
+  MAX_Y,
   PAGE_WIDTH,
 } from "@/app/_lib/pdf-helpers";
 import { formatCurrency } from "@/app/_lib/utils";
 
+import { ChartDataPoint } from "../../charts/_actions/get-chart-data";
 import { PeriodResult } from "../_actions/get-period-result";
 import { buildPeriodNarrative } from "./period-report";
+import { buildMonthlyTrend, summarizeTrend } from "./period-trend";
 
 /** Uma linha "rótulo ....... valor", usada nos blocos de realizado/previsto. */
 function drawResultLine(
@@ -36,6 +40,7 @@ function drawResultLine(
 export function buildPeriodPdf(
   letterhead: Letterhead,
   report: PeriodResult,
+  trend: ChartDataPoint[] = [],
 ): jsPDF {
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
   let y = drawLetterhead(pdf, letterhead);
@@ -114,6 +119,61 @@ export function buildPeriodPdf(
     y = drawResultLine(pdf, "Resultado previsto", report.expectedProfit, y, {
       bold: true,
     });
+    y += 10;
+  }
+
+  // TENDÊNCIA — lucro mês a mês do ano de referência
+  const monthlyTrend = buildMonthlyTrend(trend);
+  if (monthlyTrend.length > 0) {
+    const trendYear = trend[0]?.yearMonth.slice(0, 4) ?? "";
+
+    if (y + 20 > MAX_Y) {
+      pdf.addPage();
+      y = MARGIN;
+    }
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(11);
+    pdf.setTextColor(20);
+    pdf.text(`Tendência do ano de ${trendYear}`, MARGIN, y);
+    y += 3;
+    pdf.setDrawColor(220);
+    pdf.line(MARGIN, y, PAGE_WIDTH - MARGIN, y);
+    y += 8;
+
+    y = drawSignedBarChart(
+      pdf,
+      monthlyTrend.map((point) => ({
+        label: point.month,
+        value: point.profit,
+      })),
+      y,
+    );
+    y += 6;
+
+    const summary = summarizeTrend(monthlyTrend);
+    if (summary) {
+      y = drawResultLine(
+        pdf,
+        "Lucro médio mensal",
+        Math.round(summary.averageProfit * 100),
+        y,
+      );
+      y = drawResultLine(
+        pdf,
+        `Melhor mês (${summary.bestMonth.month})`,
+        Math.round(summary.bestMonth.profit * 100),
+        y,
+        { color: 22 },
+      );
+      y = drawResultLine(
+        pdf,
+        `Pior mês (${summary.worstMonth.month})`,
+        Math.round(summary.worstMonth.profit * 100),
+        y,
+        { color: 180 },
+      );
+    }
   }
 
   return pdf;

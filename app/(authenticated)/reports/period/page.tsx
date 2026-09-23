@@ -1,14 +1,19 @@
+import { format } from "date-fns";
 import { TrendingDownIcon, TrendingUpIcon, WalletIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/app/_components/ui/button";
 import { formatCurrency } from "@/app/_lib/utils";
 
-import { getAvailableChartYears } from "../../charts/_actions/get-chart-data";
+import {
+  getAvailableChartYears,
+  getChartData,
+} from "../../charts/_actions/get-chart-data";
 import { SummaryCard } from "../../dashboard/_components/summary-card";
 import { getPeriodResult, PeriodType } from "../_actions/get-period-result";
 import { DownloadPeriodPdfButton } from "../_components/download-period-pdf-button";
 import { PeriodResultFilter } from "../_components/period-result-filter";
+import { PeriodTrendSection } from "../_components/period-trend-section";
 import { buildPeriodNarrative } from "../_lib/period-report";
 
 interface PeriodReportPageProps {
@@ -24,11 +29,19 @@ const PeriodReportPage = async ({ searchParams }: PeriodReportPageProps) => {
   const parsedMonth = month ? parseInt(month, 10) : new Date().getMonth() + 1;
   const selectedMonth = parsedMonth >= 1 && parsedMonth <= 12 ? parsedMonth : 1;
 
-  const [result, yearsResult] = await Promise.all([
+  const trendReference =
+    periodType === "year"
+      ? new Date(selectedYear, 0, 1)
+      : new Date(selectedYear, selectedMonth - 1, 1);
+  const highlightYearMonth = format(trendReference, "yyyy-MM");
+
+  const [result, yearsResult, trendResult] = await Promise.all([
     getPeriodResult(periodType, selectedYear, selectedMonth),
     getAvailableChartYears(),
+    getChartData(trendReference, "year"),
   ]);
   const availableYears = yearsResult.success ? yearsResult.data : [currentYear];
+  const trend = trendResult.success ? trendResult.data : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,7 +62,9 @@ const PeriodReportPage = async ({ searchParams }: PeriodReportPageProps) => {
               Entradas, saídas e lucro de um mês ou ano específico
             </p>
           </div>
-          {result.success && <DownloadPeriodPdfButton report={result.data} />}
+          {result.success && (
+            <DownloadPeriodPdfButton report={result.data} trend={trend} />
+          )}
         </div>
       </div>
 
@@ -130,6 +145,15 @@ const PeriodReportPage = async ({ searchParams }: PeriodReportPageProps) => {
                 />
               </div>
             </div>
+          )}
+
+          {/* TENDÊNCIA */}
+          {trend.length > 0 && (
+            <PeriodTrendSection
+              year={trendReference.getFullYear()}
+              trend={trend}
+              highlightYearMonth={highlightYearMonth}
+            />
           )}
         </>
       )}
