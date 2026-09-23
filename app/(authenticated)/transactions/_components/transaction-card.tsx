@@ -61,6 +61,7 @@ export function TransactionCard({
           <TransactionStatusCheckbox
             transactionId={transaction.id}
             isPaid={isPaid}
+            amountInCents={transaction.amountInCents}
             idPrefix="transaction-card"
           />
         </div>

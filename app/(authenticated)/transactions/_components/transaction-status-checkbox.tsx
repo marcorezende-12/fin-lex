@@ -11,6 +11,8 @@ import { ConfirmPaymentDialog } from "./confirm-payment-dialog";
 interface TransactionStatusCheckboxProps {
   transactionId: string;
   isPaid: boolean;
+  /** Valor atualmente lançado, em centavos — pré-preenche o valor a confirmar. */
+  amountInCents: number;
   /**
    * Prefixo do id do checkbox. A tabela (desktop) e a lista de cards (mobile)
    * coexistem no DOM, então cada uma usa um prefixo próprio para evitar ids duplicados.
@@ -27,6 +29,7 @@ interface TransactionStatusCheckboxProps {
 export function TransactionStatusCheckbox({
   transactionId,
   isPaid,
+  amountInCents,
   idPrefix = "transaction",
 }: TransactionStatusCheckboxProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -60,6 +63,7 @@ export function TransactionStatusCheckbox({
 
       <ConfirmPaymentDialog
         transactionId={transactionId}
+        amountInCents={amountInCents}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
       />

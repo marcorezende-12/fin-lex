@@ -56,6 +56,7 @@ export function TransactionTableRow({
         <TransactionStatusCheckbox
           transactionId={transaction.id}
           isPaid={isPaid}
+          amountInCents={transaction.amountInCents}
         />
       </TableCell>
 

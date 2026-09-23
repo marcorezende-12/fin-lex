@@ -13,37 +13,55 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/_components/ui/dialog";
+import { Input } from "@/app/_components/ui/input";
+import { Label } from "@/app/_components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/app/_components/ui/popover";
+import { formatCurrency } from "@/app/_lib/utils";
 
 import { toggleTransactionStatus } from "../_actions/toggle-transaction-status";
 
 interface ConfirmPaymentDialogProps {
   transactionId: string;
+  /** Valor atualmente lançado (muitas vezes uma estimativa), em centavos. */
+  amountInCents: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 /**
  * Dialog de confirmação de pagamento.
- * Exibe um date picker para o usuário informar a data em que o pagamento ocorreu.
- * Ao confirmar, chama a action passando a data selecionada.
+ * Exibe um date picker para o usuário informar a data em que o pagamento ocorreu
+ * e um campo de valor, pré-preenchido com o valor lançado, para o usuário ajustar
+ * caso o lançamento tenha sido uma estimativa (ex. conta de luz) e o valor real
+ * pago tenha sido diferente.
+ * Ao confirmar, chama a action passando a data e o valor selecionados.
  */
 export function ConfirmPaymentDialog({
   transactionId,
+  amountInCents,
   open,
   onOpenChange,
 }: ConfirmPaymentDialogProps) {
   const [paidAt, setPaidAt] = useState<Date>(new Date());
+  const [paidAmount, setPaidAmount] = useState<number>(amountInCents / 100);
   const [isPending, startTransition] = useTransition();
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   const handleConfirm = () => {
+    if (paidAmount <= 0) {
+      toast.error("O valor deve ser positivo");
+      return;
+    }
     startTransition(async () => {
-      const result = await toggleTransactionStatus(transactionId, paidAt);
+      const result = await toggleTransactionStatus(
+        transactionId,
+        paidAt,
+        Math.round(paidAmount * 100),
+      );
       if (!result.success) {
         toast.error(result.error);
         return;
@@ -99,6 +117,21 @@ export function ConfirmPaymentDialog({
               />
             </PopoverContent>
           </Popover>
+        </div>
+
+        {/* VALOR PAGO */}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="confirm-payment-amount">Valor pago</Label>
+          <Input
+            id="confirm-payment-amount"
+            placeholder="R$ 0,00"
+            inputMode="numeric"
+            value={formatCurrency(paidAmount)}
+            onChange={(e) => {
+              const rawValue = e.target.value.replace(/\D/g, "");
+              setPaidAmount(Number(rawValue) / 100);
+            }}
+          />
         </div>
 
         <DialogFooter className="grid grid-cols-2 gap-3">
