@@ -1,3 +1,7 @@
+import {
+  PageSizeSelect,
+  parsePageSize,
+} from "@/app/_components/ui/page-size-select";
 import { PaginationControls } from "@/app/_components/ui/pagination-controls";
 import {
   PaymentMethod,
@@ -13,8 +17,6 @@ import { ExportCsvButton } from "./_components/export-csv-button";
 import { TransactionFilters } from "./_components/transaction-filters";
 import { TransactionsTable } from "./_components/transactions-table";
 
-const PAGE_SIZE = 50;
-
 interface TransactionsPageProps {
   searchParams: Promise<{
     search?: string;
@@ -24,11 +26,12 @@ interface TransactionsPageProps {
     from?: string;
     to?: string;
     page?: string;
+    pageSize?: string;
   }>;
 }
 
 const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
-  const { search, type, status, paymentMethod, from, to, page } =
+  const { search, type, status, paymentMethod, from, to, page, pageSize } =
     await searchParams;
 
   const filters = {
@@ -40,9 +43,10 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
     to: to ? new Date(to) : undefined,
   };
   const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
+  const currentPageSize = parsePageSize(pageSize);
 
   const [result, categoriesResult, clientsResult] = await Promise.all([
-    getTransactions(filters, { page: currentPage, pageSize: PAGE_SIZE }),
+    getTransactions(filters, { page: currentPage, pageSize: currentPageSize }),
     getCategories(),
     getClients(),
   ]);
@@ -92,8 +96,11 @@ const TransactionsPage = async ({ searchParams }: TransactionsPageProps) => {
         showBulkActions
       />
 
-      {/* PAGINAÇÃO */}
-      <PaginationControls page={currentPage} totalPages={totalPages} />
+      {/* QUANTIDADE POR PÁGINA + PAGINAÇÃO */}
+      <div className="flex flex-col items-center gap-3 md:flex-row md:justify-between">
+        <PageSizeSelect pageSize={currentPageSize} />
+        <PaginationControls page={currentPage} totalPages={totalPages} />
+      </div>
     </div>
   );
 };
