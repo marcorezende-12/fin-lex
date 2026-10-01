@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
-import { Calendar } from "@/app/_components/ui/calendar";
+import { DateInput } from "@/app/_components/ui/date-input";
 import {
   Dialog,
   DialogContent,
@@ -15,11 +15,6 @@ import {
 } from "@/app/_components/ui/dialog";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/app/_components/ui/popover";
 import { formatCurrency } from "@/app/_lib/utils";
 
 import { toggleTransactionStatus } from "../_actions/toggle-transaction-status";
@@ -49,7 +44,6 @@ export function ConfirmPaymentDialog({
   const [paidAt, setPaidAt] = useState<Date>(new Date());
   const [paidAmount, setPaidAmount] = useState<number>(amountInCents / 100);
   const [isPending, startTransition] = useTransition();
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   const handleConfirm = () => {
     if (paidAmount <= 0) {
@@ -90,33 +84,13 @@ export function ConfirmPaymentDialog({
 
         {/* DATE PICKER */}
         <div className="flex justify-center py-1">
-          <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full cursor-pointer justify-start gap-2 font-normal"
-              >
-                <CalendarIcon className="text-muted-foreground h-4 w-4" />
-                {paidAt.toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "2-digit",
-                })}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-              <Calendar
-                mode="single"
-                selected={paidAt}
-                onSelect={(date) => {
-                  if (date) setPaidAt(date);
-                  setIsDatePopoverOpen(false);
-                }}
-                disabled={(date) => date > new Date()}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <DateInput
+            aria-label="Data do pagamento"
+            value={paidAt}
+            onChange={setPaidAt}
+            isDateDisabled={(date) => date > new Date()}
+            align="center"
+          />
         </div>
 
         {/* VALOR PAGO */}

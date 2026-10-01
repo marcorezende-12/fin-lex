@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   // Permite usar env(safe-area-inset-*) (notch / barra de gestos) no layout mobile
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#f1f4f7" },
     { media: "(prefers-color-scheme: dark)", color: "#050505" },
   ],
 };

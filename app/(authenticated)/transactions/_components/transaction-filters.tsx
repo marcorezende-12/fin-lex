@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
+import { DatePickerWithRange } from "@/app/_components/ui/date-picker";
 import { Input } from "@/app/_components/ui/input";
 import {
   Select,
@@ -31,12 +32,14 @@ export function TransactionFilters() {
   const type = searchParams.get("type") ?? "";
   const status = searchParams.get("status") ?? "";
   const paymentMethod = searchParams.get("paymentMethod") ?? "";
+  const hasPeriod = searchParams.has("from") || searchParams.has("to");
 
   // Estado local controlado para o campo de busca —
   // assim o botão de lupa consegue ler o valor atual sem depender de blur
   const [localSearch, setLocalSearch] = useState(search);
 
-  const hasActiveFilters = search || type || status || paymentMethod;
+  const hasActiveFilters =
+    search || type || status || paymentMethod || hasPeriod;
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -71,6 +74,8 @@ export function TransactionFilters() {
     params.delete("type");
     params.delete("status");
     params.delete("paymentMethod");
+    params.delete("from");
+    params.delete("to");
     router.push(`?${params.toString()}`);
   };
 
@@ -158,6 +163,12 @@ export function TransactionFilters() {
           ))}
         </SelectContent>
       </Select>
+
+      {/* PERÍODO (vencimento) — sem período na URL, lista tudo */}
+      <DatePickerWithRange
+        defaultToCurrentMonth={false}
+        className="col-span-2 md:col-span-1"
+      />
 
       {/* LIMPAR FILTROS */}
       {hasActiveFilters && (

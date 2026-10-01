@@ -2,12 +2,11 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
-import { Calendar } from "@/app/_components/ui/calendar";
 import { Checkbox } from "@/app/_components/ui/checkbox";
+import { DateInput } from "@/app/_components/ui/date-input";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/_components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/app/_components/ui/popover";
-import { cn } from "@/app/_lib/utils";
 
 interface RecurringDialogProps {
   isOpen: boolean;
@@ -49,13 +42,11 @@ export function RecurringDialog({
 }: RecurringDialogProps) {
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setHasEndDate(!!defaultEndDate);
       setEndDate(defaultEndDate ?? undefined);
-      setIsDatePopoverOpen(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -95,40 +86,12 @@ export function RecurringDialog({
           </div>
 
           {hasEndDate ? (
-            <Popover
-              open={isDatePopoverOpen}
-              onOpenChange={setIsDatePopoverOpen}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    "w-full cursor-pointer justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                  {endDate ? (
-                    format(endDate, "PPP", { locale: ptBR })
-                  ) : (
-                    <span>Selecionar data de término</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={(date) => {
-                    setEndDate(date);
-                    setIsDatePopoverOpen(false);
-                  }}
-                  disabled={(date) => date < startDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DateInput
+              aria-label="Data de término"
+              value={endDate}
+              onChange={setEndDate}
+              isDateDisabled={(date) => date < startDate}
+            />
           ) : (
             <p className="text-muted-foreground bg-muted/50 rounded-md border p-3 text-center text-sm">
               Sem término — a cobrança se repete todo mês indefinidamente, até

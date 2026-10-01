@@ -64,11 +64,11 @@
 }
 
 :root {
-  --background: hsl(0 0% 100%);
+  --background: hsl(210 20% 95.5%);
   --foreground: hsl(0 0% 3.9216%);
-  --card: hsl(0 0% 99.2157%);
+  --card: hsl(210 25% 98.5%);
   --card-foreground: hsl(0 0% 3.9216%);
-  --popover: hsl(0 0% 99.2157%);
+  --popover: hsl(210 25% 98.5%);
   --popover-foreground: hsl(0 0% 3.9216%);
   --primary: hsl(102 100% 37.2549%);
   --primary-foreground: hsl(0 0% 100%);
@@ -88,7 +88,7 @@
   --chart-3: hsl(101.958 100% 28.0392%);
   --chart-4: hsl(105.9016 81.3333% 55.8824%);
   --chart-5: hsl(102 100% 23.5294%);
-  --sidebar: hsl(0 0% 98.0392%);
+  --sidebar: hsl(210 20% 97%);
   --sidebar-foreground: hsl(0 0% 3.9216%);
   --sidebar-primary: hsl(102 100% 37.2549%);
   --sidebar-primary-foreground: hsl(0 0% 100%);

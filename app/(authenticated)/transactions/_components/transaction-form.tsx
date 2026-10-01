@@ -2,14 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "@/app/_components/ui/button";
-import { Calendar } from "@/app/_components/ui/calendar";
+import { DateInput } from "@/app/_components/ui/date-input";
 import {
   Form,
   FormControl,
@@ -20,18 +18,13 @@ import {
 } from "@/app/_components/ui/form";
 import { Input } from "@/app/_components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/app/_components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select";
-import { cn, formatCurrency } from "@/app/_lib/utils";
+import { formatCurrency } from "@/app/_lib/utils";
 import { PaymentMethod, TransactionType } from "@/generated/prisma";
 
 import { createTransaction } from "../_actions/create-transaction";
@@ -75,7 +68,6 @@ export function TransactionForm({
   const [isInstallmentsDialogOpen, setIsInstallmentsDialogOpen] =
     useState(false);
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
 
   const form = useForm<TransactionInput>({
     resolver: zodResolver(transactionSchema),
@@ -340,40 +332,9 @@ export function TransactionForm({
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Data *</FormLabel>
-                <Popover
-                  open={isDatePopoverOpen}
-                  onOpenChange={setIsDatePopoverOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full cursor-pointer pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: ptBR })
-                        ) : (
-                          <span>Selecionar Data</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={(date) => {
-                        field.onChange(date);
-                        setIsDatePopoverOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <DateInput value={field.value} onChange={field.onChange} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

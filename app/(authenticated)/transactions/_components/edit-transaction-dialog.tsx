@@ -2,15 +2,14 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon, PencilIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/app/_components/ui/button";
-import { Calendar } from "@/app/_components/ui/calendar";
+import { DateInput } from "@/app/_components/ui/date-input";
 import {
   Dialog,
   DialogContent,
@@ -29,18 +28,13 @@ import {
 } from "@/app/_components/ui/form";
 import { Input } from "@/app/_components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/app/_components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select";
-import { cn, formatCurrency } from "@/app/_lib/utils";
+import { formatCurrency } from "@/app/_lib/utils";
 import { PaymentMethod, TransactionType } from "@/generated/prisma";
 
 import { TransactionRow } from "../_actions/get-transactions";
@@ -85,7 +79,6 @@ export function EditTransactionDialog({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isCancellingRecurring, setIsCancellingRecurring] = useState(false);
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [isCancelPending, startCancelTransition] = useTransition();
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
   const [isConfigPending, startConfigTransition] = useTransition();
@@ -404,40 +397,12 @@ export function EditTransactionDialog({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Data de vencimento *</FormLabel>
-                    <Popover
-                      open={isDatePopoverOpen}
-                      onOpenChange={setIsDatePopoverOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full cursor-pointer pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ptBR })
-                            ) : (
-                              <span>Selecionar data</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={(date) => {
-                            field.onChange(date);
-                            setIsDatePopoverOpen(false);
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormControl>
+                      <DateInput
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

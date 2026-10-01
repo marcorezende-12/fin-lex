@@ -1,10 +1,9 @@
-import { addMonths, format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CalendarIcon, PencilIcon } from "lucide-react";
+import { addMonths } from "date-fns";
+import { PencilIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
-import { Calendar } from "@/app/_components/ui/calendar";
+import { DateInput } from "@/app/_components/ui/date-input";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +13,6 @@ import {
 } from "@/app/_components/ui/dialog";
 import { Input } from "@/app/_components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/app/_components/ui/popover";
-import {
   Table,
   TableBody,
   TableCell,
@@ -26,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table";
-import { cn, formatCurrency } from "@/app/_lib/utils";
+import { formatCurrency } from "@/app/_lib/utils";
 
 export interface InstallmentData {
   number: number;
@@ -70,11 +64,6 @@ export function InstallmentsDialog({
     null,
   );
   const [editValue, setEditValue] = useState<string>("");
-  const [isHeaderDatePopoverOpen, setIsHeaderDatePopoverOpen] = useState(false);
-  // Só uma linha por vez pode ter o popover de data aberto.
-  const [openRowDatePopoverIndex, setOpenRowDatePopoverIndex] = useState<
-    number | null
-  >(null);
 
   // To prevent overriding initial data when the dialog opens, we track if it's a manual edit.
   const [isUserEditingHeader, setIsUserEditingHeader] = useState(false);
@@ -238,9 +227,7 @@ export function InstallmentsDialog({
     setEditingValueIndex(null);
   };
 
-  const handleDateEdit = (index: number, newDate: Date | undefined) => {
-    setOpenRowDatePopoverIndex(null);
-    if (!newDate) return;
+  const handleDateEdit = (index: number, newDate: Date) => {
     const updatedInstallments = [...installments];
     updatedInstallments[index].date = newDate;
     setInstallments(updatedInstallments);
@@ -319,41 +306,14 @@ export function InstallmentsDialog({
           {/* DATA */}
           <div className="flex flex-col justify-center space-y-2">
             <label className="text-sm leading-none font-medium">Data *</label>
-            <Popover
-              open={isHeaderDatePopoverOpen}
-              onOpenChange={setIsHeaderDatePopoverOpen}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full cursor-pointer justify-start text-left font-normal",
-                    !localStartDate && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                  {localStartDate ? (
-                    format(localStartDate, "PPP", { locale: ptBR })
-                  ) : (
-                    <span>Selecionar Data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={localStartDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setIsUserEditingHeader(true);
-                      setLocalStartDate(date);
-                    }
-                    setIsHeaderDatePopoverOpen(false);
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DateInput
+              aria-label="Data da primeira parcela"
+              value={localStartDate}
+              onChange={(date) => {
+                setIsUserEditingHeader(true);
+                setLocalStartDate(date);
+              }}
+            />
           </div>
         </div>
 
@@ -385,32 +345,13 @@ export function InstallmentsDialog({
                       {installment.number}
                     </TableCell>
                     <TableCell>
-                      <Popover
-                        open={openRowDatePopoverIndex === index}
-                        onOpenChange={(open) =>
-                          setOpenRowDatePopoverIndex(open ? index : null)
-                        }
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-auto cursor-pointer justify-start px-2 font-normal"
-                          >
-                            <CalendarIcon className="mr-2 h-3 w-3 opacity-50" />
-                            {format(installment.date, "dd/MM/yyyy", {
-                              locale: ptBR,
-                            })}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={installment.date}
-                            onSelect={(date) => handleDateEdit(index, date)}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <DateInput
+                        aria-label={`Data da parcela ${installment.number}`}
+                        value={installment.date}
+                        onChange={(date) => handleDateEdit(index, date)}
+                        containerClassName="w-36"
+                        className="h-8 max-md:h-9"
+                      />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end">
