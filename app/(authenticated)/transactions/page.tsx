@@ -1,8 +1,6 @@
-import {
-  PageSizeSelect,
-  parsePageSize,
-} from "@/app/_components/ui/page-size-select";
+import { PageSizeSelect } from "@/app/_components/ui/page-size-select";
 import { PaginationControls } from "@/app/_components/ui/pagination-controls";
+import { parsePageSize } from "@/app/_lib/page-size";
 import {
   PaymentMethod,
   TransactionStatus,

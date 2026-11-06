@@ -2,6 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/app/_lib/page-size";
+
 import {
   Select,
   SelectContent,
@@ -9,20 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
-
-export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
-export const DEFAULT_PAGE_SIZE = 20;
-
-/**
- * Lê o `pageSize` da URL, aceitando só os valores oferecidos no seletor —
- * qualquer outro valor (ou ausência) cai no padrão.
- */
-export function parsePageSize(value: string | undefined): number {
-  const size = Number(value);
-  return (PAGE_SIZE_OPTIONS as readonly number[]).includes(size)
-    ? size
-    : DEFAULT_PAGE_SIZE;
-}
 
 interface PageSizeSelectProps {
   pageSize: number;
