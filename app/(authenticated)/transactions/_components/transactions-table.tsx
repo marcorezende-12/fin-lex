@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
 import { Table, TableBody } from "@/app/_components/ui/table";
+import { cn } from "@/app/_lib/utils";
 
 import { TransactionRow } from "../_actions/get-transactions";
 import { SelectOption } from "../_types";
@@ -22,6 +23,11 @@ interface TransactionsTableProps {
    * onde ações em massa não fazem sentido.
    */
   showBulkActions?: boolean;
+  /**
+   * Limita a altura da lista e rola por dentro (cabeçalho da tabela fixo no
+   * topo). Usado no dashboard, que mostra várias movimentações num espaço fixo.
+   */
+  scrollable?: boolean;
 }
 
 /**
@@ -40,6 +46,7 @@ export function TransactionsTable({
   categories = [],
   clients = [],
   showBulkActions = false,
+  scrollable = false,
 }: TransactionsTableProps) {
   // "Selecionar todas" é um único toggle (não seleção por linha): quando
   // marcado, todas as transações atualmente carregadas (já filtradas) são
@@ -58,6 +65,23 @@ export function TransactionsTable({
     );
   }
 
+  const table = (
+    <Table>
+      <TransactionTableHeader />
+      <TableBody>
+        {transactions.map((transaction) => (
+          <TransactionTableRow
+            key={transaction.id}
+            transaction={transaction}
+            categories={categories}
+            clients={clients}
+            selected={allSelected}
+          />
+        ))}
+      </TableBody>
+    </Table>
+  );
+
   return (
     <div className="flex flex-col gap-3">
       {showBulkActions && (
@@ -70,7 +94,12 @@ export function TransactionsTable({
       )}
 
       {/* MOBILE: um card por transação */}
-      <ul className="border-border bg-card divide-border/50 divide-y overflow-hidden rounded-2xl border shadow-sm md:hidden">
+      <ul
+        className={cn(
+          "border-border bg-card divide-border/50 divide-y rounded-2xl border shadow-sm md:hidden",
+          scrollable ? "max-h-[70vh] overflow-y-auto" : "overflow-hidden",
+        )}
+      >
         {transactions.map((transaction) => (
           <TransactionCard
             key={transaction.id}
@@ -84,22 +113,16 @@ export function TransactionsTable({
 
       {/* DESKTOP: tabela completa */}
       <div className="border-border bg-card hidden overflow-hidden rounded-2xl border shadow-sm md:block">
-        <ScrollArea className="w-full">
-          <Table>
-            <TransactionTableHeader />
-            <TableBody>
-              {transactions.map((transaction) => (
-                <TransactionTableRow
-                  key={transaction.id}
-                  transaction={transaction}
-                  categories={categories}
-                  clients={clients}
-                  selected={allSelected}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+        {scrollable ? (
+          // Uma única área de rolagem nos dois eixos: o container interno do
+          // <Table> (overflow-x-auto) vira overflow-visible, senão ele seria o
+          // ancestral de rolagem do <thead> e o sticky não funcionaria.
+          <div className="[&_thead]:bg-card max-h-[600px] overflow-auto [&_[data-slot=table-container]]:overflow-visible [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10">
+            {table}
+          </div>
+        ) : (
+          <ScrollArea className="w-full">{table}</ScrollArea>
+        )}
       </div>
     </div>
   );

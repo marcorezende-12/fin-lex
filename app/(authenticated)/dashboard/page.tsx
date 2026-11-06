@@ -14,6 +14,9 @@ import { TransactionsTable } from "../transactions/_components/transactions-tabl
 import { getDashboardSummary } from "./_actions/get-dashboard-summary";
 import SummaryCards from "./_components/summary-cards";
 
+/** Quantas movimentações do período aparecem na lista (com rolagem). */
+const RECENT_TRANSACTIONS_LIMIT = 20;
+
 interface DashboardPageProps {
   searchParams: Promise<{ from?: string; to?: string }>;
 }
@@ -32,15 +35,16 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     clientsResult,
   ] = await Promise.all([
     getDashboardSummary(startDate, endDate),
-    getTransactions({ from: startDate, to: endDate }),
+    getTransactions(
+      { from: startDate, to: endDate },
+      { pageSize: RECENT_TRANSACTIONS_LIMIT },
+    ),
     getChartData(new Date()),
     getCategories(),
     getClients(),
   ]);
 
-  const recentTransactions = recentResult.success
-    ? recentResult.data.slice(0, 8)
-    : [];
+  const recentTransactions = recentResult.success ? recentResult.data : [];
   const chartData = chartResult.success ? chartResult.data : [];
   const categories = categoriesResult.success
     ? categoriesResult.data.map((c) => ({ value: c.id, label: c.name }))
@@ -89,6 +93,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
           transactions={recentTransactions}
           categories={categories}
           clients={clients}
+          scrollable
         />
       </div>
     </div>
